@@ -15,6 +15,11 @@
 		9CEF0EC32C50412C008E091B /* XPTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EC22C50412C008E091B /* XPTests.swift */; };
 		9CEF0ECD2C50412C008E091B /* XPUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0ECC2C50412C008E091B /* XPUITests.swift */; };
 		9CEF0ECF2C50412C008E091B /* XPUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0ECE2C50412C008E091B /* XPUITestsLaunchTests.swift */; };
+		9CEF0EDC2C505BC0008E091B /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EDB2C505BC0008E091B /* PersistenceManager.swift */; };
+		9CEF0EDE2C505BD9008E091B /* XPBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EDD2C505BD9008E091B /* XPBar.swift */; };
+		9CEF0EE02C505BF6008E091B /* TaskListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EDF2C505BF6008E091B /* TaskListView.swift */; };
+		9CEF0EE22C505C0A008E091B /* AddTaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EE12C505C0A008E091B /* AddTaskView.swift */; };
+		9CEF0EE42C505CE4008E091B /* XPTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EE32C505CE4008E091B /* XPTask.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +52,11 @@
 		9CEF0EC82C50412C008E091B /* XPUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XPUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9CEF0ECC2C50412C008E091B /* XPUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPUITests.swift; sourceTree = "<group>"; };
 		9CEF0ECE2C50412C008E091B /* XPUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		9CEF0EDB2C505BC0008E091B /* PersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManager.swift; sourceTree = "<group>"; };
+		9CEF0EDD2C505BD9008E091B /* XPBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPBar.swift; sourceTree = "<group>"; };
+		9CEF0EDF2C505BF6008E091B /* TaskListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListView.swift; sourceTree = "<group>"; };
+		9CEF0EE12C505C0A008E091B /* AddTaskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTaskView.swift; sourceTree = "<group>"; };
+		9CEF0EE32C505CE4008E091B /* XPTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPTask.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,9 +107,14 @@
 		9CEF0EAD2C50412B008E091B /* XP */ = {
 			isa = PBXGroup;
 			children = (
-				9CEF0EAE2C50412B008E091B /* XPApp.swift */,
 				9CEF0EB02C50412B008E091B /* ContentView.swift */,
+				9CEF0EAE2C50412B008E091B /* XPApp.swift */,
 				9CEF0EB22C50412B008E091B /* Item.swift */,
+				9CEF0EDB2C505BC0008E091B /* PersistenceManager.swift */,
+				9CEF0EDD2C505BD9008E091B /* XPBar.swift */,
+				9CEF0EE32C505CE4008E091B /* XPTask.swift */,
+				9CEF0EDF2C505BF6008E091B /* TaskListView.swift */,
+				9CEF0EE12C505C0A008E091B /* AddTaskView.swift */,
 				9CEF0EB42C50412C008E091B /* Assets.xcassets */,
 				9CEF0EB62C50412C008E091B /* XP.entitlements */,
 				9CEF0EB72C50412C008E091B /* Preview Content */,
@@ -262,9 +277,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9CEF0EDE2C505BD9008E091B /* XPBar.swift in Sources */,
+				9CEF0EE22C505C0A008E091B /* AddTaskView.swift in Sources */,
+				9CEF0EE42C505CE4008E091B /* XPTask.swift in Sources */,
 				9CEF0EB12C50412B008E091B /* ContentView.swift in Sources */,
 				9CEF0EB32C50412B008E091B /* Item.swift in Sources */,
 				9CEF0EAF2C50412B008E091B /* XPApp.swift in Sources */,
+				9CEF0EDC2C505BC0008E091B /* PersistenceManager.swift in Sources */,
+				9CEF0EE02C505BF6008E091B /* TaskListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
