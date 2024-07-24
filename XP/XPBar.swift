@@ -4,6 +4,7 @@ struct XPBar: View {
     var totalXP: Int
     var maxXP: Int
     var level: Int
+    var reward: String
 
     var body: some View {
         VStack {
@@ -14,6 +15,11 @@ struct XPBar: View {
             ProgressView(value: Double(totalXP), total: Double(maxXP))
                 .progressViewStyle(LinearProgressViewStyle())
                 .padding()
+            if !reward.isEmpty {
+                Text("Reward: \(reward)")
+                    .font(.subheadline)
+                    .padding()
+            }
         }
     }
 }

@@ -4,6 +4,9 @@ class PersistenceManager {
     static let shared = PersistenceManager()
 
     private let tasksKey = "tasks"
+    private let accumulatedXPKey = "accumulatedXP"
+    private let levelKey = "level"
+    private let rewardKey = "reward"
     private let defaults = UserDefaults.standard
 
     func saveTasks(_ tasks: [XPTask]) {
@@ -19,5 +22,29 @@ class PersistenceManager {
             }
         }
         return []
+    }
+
+    func saveAccumulatedXP(_ xp: Int) {
+        defaults.set(xp, forKey: accumulatedXPKey)
+    }
+
+    func loadAccumulatedXP() -> Int {
+        return defaults.integer(forKey: accumulatedXPKey)
+    }
+
+    func saveLevel(_ level: Int) {
+        defaults.set(level, forKey: levelKey)
+    }
+
+    func loadLevel() -> Int {
+        return defaults.integer(forKey: levelKey)
+    }
+
+    func saveReward(_ reward: String) {
+        defaults.set(reward, forKey: rewardKey)
+    }
+
+    func loadReward() -> String {
+        return defaults.string(forKey: rewardKey) ?? ""
     }
 }

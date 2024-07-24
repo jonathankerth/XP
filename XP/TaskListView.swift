@@ -2,7 +2,6 @@ import SwiftUI
 
 struct TaskListView: View {
     @Binding var tasks: [XPTask]
-    @Binding var totalXP: Int
     var onTasksChange: () -> Void
 
     var body: some View {

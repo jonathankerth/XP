@@ -20,6 +20,7 @@
 		9CEF0EE02C505BF6008E091B /* TaskListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EDF2C505BF6008E091B /* TaskListView.swift */; };
 		9CEF0EE22C505C0A008E091B /* AddTaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EE12C505C0A008E091B /* AddTaskView.swift */; };
 		9CEF0EE42C505CE4008E091B /* XPTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EE32C505CE4008E091B /* XPTask.swift */; };
+		9CEF0EE62C50C537008E091B /* RewardInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EE52C50C537008E091B /* RewardInputView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 		9CEF0EDF2C505BF6008E091B /* TaskListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListView.swift; sourceTree = "<group>"; };
 		9CEF0EE12C505C0A008E091B /* AddTaskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTaskView.swift; sourceTree = "<group>"; };
 		9CEF0EE32C505CE4008E091B /* XPTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPTask.swift; sourceTree = "<group>"; };
+		9CEF0EE52C50C537008E091B /* RewardInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardInputView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				9CEF0EB02C50412B008E091B /* ContentView.swift */,
+				9CEF0EE52C50C537008E091B /* RewardInputView.swift */,
 				9CEF0EAE2C50412B008E091B /* XPApp.swift */,
 				9CEF0EB22C50412B008E091B /* Item.swift */,
 				9CEF0EDB2C505BC0008E091B /* PersistenceManager.swift */,
@@ -285,6 +288,7 @@
 				9CEF0EAF2C50412B008E091B /* XPApp.swift in Sources */,
 				9CEF0EDC2C505BC0008E091B /* PersistenceManager.swift in Sources */,
 				9CEF0EE02C505BF6008E091B /* TaskListView.swift in Sources */,
+				9CEF0EE62C50C537008E091B /* RewardInputView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
