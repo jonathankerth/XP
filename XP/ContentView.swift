@@ -49,7 +49,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("XP App")
+            .navigationTitle("")
             .onAppear {
                 calculateAccumulatedXP()
                 resetTaskCompletionIfNeeded()
