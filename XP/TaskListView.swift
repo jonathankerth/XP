@@ -7,15 +7,21 @@ struct TaskListView: View {
     var body: some View {
         List {
             ForEach($tasks) { $task in
-                HStack {
-                    Text(task.name)
-                    Spacer()
-                    Text("\(task.xp) XP")
-                    Button(action: {
-                        task.completed.toggle()
-                        onTasksChange()
-                    }) {
-                        Image(systemName: task.completed ? "checkmark.square" : "square")
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text(task.name)
+                        Spacer()
+                        Text("\(task.xp) XP")
+                        Button(action: {
+                            task.completed.toggle()
+                            task.lastCompleted = task.completed ? Date() : nil
+                            onTasksChange()
+                        }) {
+                            Image(systemName: task.completed ? "checkmark.square" : "square")
+                        }
+                    }
+                    HStack {
+                        Text("Resets every \(task.resetIntervalDays) days")
                     }
                 }
             }

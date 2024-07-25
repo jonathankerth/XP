@@ -85,30 +85,15 @@ struct ContentView: View {
     }
 
     private func resetTaskCompletionIfNeeded() {
-        // Assuming we reset task completion every day at midnight
-        let lastResetDateKey = "lastResetDate"
-        let defaults = UserDefaults.standard
-
-        if let lastResetDate = defaults.object(forKey: lastResetDateKey) as? Date {
-            if !Calendar.current.isDateInToday(lastResetDate) {
-                resetTaskCompletion()
-                defaults.set(Date(), forKey: lastResetDateKey)
-            }
-        } else {
-            defaults.set(Date(), forKey: lastResetDateKey)
-        }
-    }
-
-    private func resetTaskCompletion() {
+        let now = Date()
         for index in tasks.indices {
-            tasks[index].completed = false
+            if let lastCompleted = tasks[index].lastCompleted,
+               let resetInterval = Calendar.current.date(byAdding: .day, value: tasks[index].resetIntervalDays, to: lastCompleted),
+               now >= resetInterval {
+                tasks[index].completed = false
+                tasks[index].lastCompleted = nil
+            }
         }
         PersistenceManager.shared.saveTasks(tasks)
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
     }
 }
