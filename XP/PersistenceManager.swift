@@ -1,13 +1,23 @@
 import Foundation
+import Combine
 
-class PersistenceManager {
+class PersistenceManager: ObservableObject {
     static let shared = PersistenceManager()
 
     private let tasksKey = "tasks"
     private let accumulatedXPKey = "accumulatedXP"
     private let levelKey = "level"
     private let rewardKey = "reward"
+    private let futureRewardsKey = "futureRewards"
+    private let pastRewardsKey = "pastRewards"
+    private let levelRewardsKey = "levelRewards"
     private let defaults = UserDefaults.standard
+
+    @Published var levelRewards: [String] = []
+
+    init() {
+        self.levelRewards = loadLevelRewards()
+    }
 
     func saveTasks(_ tasks: [XPTask]) {
         if let encoded = try? JSONEncoder().encode(tasks) {
@@ -46,5 +56,51 @@ class PersistenceManager {
 
     func loadReward() -> String {
         return defaults.string(forKey: rewardKey) ?? ""
+    }
+
+    func saveFutureRewards(_ rewards: [String]) {
+        if let encoded = try? JSONEncoder().encode(rewards) {
+            defaults.set(encoded, forKey: futureRewardsKey)
+        }
+    }
+
+    func loadFutureRewards() -> [String] {
+        if let savedRewards = defaults.data(forKey: futureRewardsKey) {
+            if let decodedRewards = try? JSONDecoder().decode([String].self, from: savedRewards) {
+                return decodedRewards
+            }
+        }
+        return []
+    }
+
+    func savePastRewards(_ rewards: [String]) {
+        if let encoded = try? JSONEncoder().encode(rewards) {
+            defaults.set(encoded, forKey: pastRewardsKey)
+        }
+    }
+
+    func loadPastRewards() -> [String] {
+        if let savedRewards = defaults.data(forKey: pastRewardsKey) {
+            if let decodedRewards = try? JSONDecoder().decode([String].self, from: savedRewards) {
+                return decodedRewards
+            }
+        }
+        return []
+    }
+
+    func saveLevelRewards(_ rewards: [String]) {
+        if let encoded = try? JSONEncoder().encode(rewards) {
+            defaults.set(encoded, forKey: levelRewardsKey)
+        }
+        levelRewards = rewards
+    }
+
+    func loadLevelRewards() -> [String] {
+        if let savedRewards = defaults.data(forKey: levelRewardsKey) {
+            if let decodedRewards = try? JSONDecoder().decode([String].self, from: savedRewards) {
+                return decodedRewards
+            }
+        }
+        return []
     }
 }

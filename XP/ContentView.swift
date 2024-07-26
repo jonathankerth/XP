@@ -5,7 +5,7 @@ struct ContentView: View {
     @State private var accumulatedXP: Int = PersistenceManager.shared.loadAccumulatedXP()
     @State private var level: Int = PersistenceManager.shared.loadLevel()
     @State private var maxXP: Int = 100
-    @State private var reward: String = PersistenceManager.shared.loadReward()
+    @StateObject private var persistenceManager = PersistenceManager.shared
 
     @State private var showAddTaskForm = false
     @State private var showAddRewardForm = false
@@ -35,7 +35,7 @@ struct ContentView: View {
                     Spacer()
                 }
 
-                XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: reward)
+                XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: currentReward)
                 TaskListView(tasks: $tasks, onTasksChange: saveTasks)
 
                 if !showAddTaskForm && !showAddRewardForm {
@@ -88,7 +88,7 @@ struct ContentView: View {
 
                 if showAddRewardForm {
                     VStack(spacing: 20) {
-                        RewardInputView(reward: $reward, isPresented: $showAddRewardForm)
+                        RewardInputView(reward: Binding(get: { currentReward }, set: { persistenceManager.levelRewards[level - 1] = $0 }), isPresented: $showAddRewardForm)
                     }
                     .padding()
                 }
@@ -98,6 +98,14 @@ struct ContentView: View {
                 resetTaskCompletionIfNeeded()
             }
             .navigationTitle("")
+        }
+    }
+
+    private var currentReward: String {
+        if level <= persistenceManager.levelRewards.count {
+            return persistenceManager.levelRewards[level - 1]
+        } else {
+            return ""
         }
     }
 
@@ -118,7 +126,6 @@ struct ContentView: View {
             level += 1
             accumulatedXP -= maxXP
             maxXP = calculateMaxXP(for: level)
-            reward = ""
             PersistenceManager.shared.saveLevel(level)
             PersistenceManager.shared.saveAccumulatedXP(accumulatedXP)
         }
