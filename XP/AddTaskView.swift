@@ -3,71 +3,74 @@ import SwiftUI
 struct AddTaskView: View {
     @Binding var tasks: [XPTask]
     var onTasksChange: () -> Void
+    @Binding var showAddTaskForm: Bool
 
     @State private var taskName: String = ""
     @State private var taskXP: Int = 1
     @State private var resetIntervalDays: Int = 1
-    @State private var showAddTaskForm: Bool = false
 
     var body: some View {
-        VStack {
-            Button(action: {
-                showAddTaskForm.toggle()
-            }) {
-                Text(showAddTaskForm ? "-" : "+")
-                    .font(.system(size: 40, weight: .bold))
-                    .foregroundColor(.black)
+        VStack(spacing: 20) {
+            TextField("Task Name", text: $taskName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .background(Color(UIColor.systemGray6))
+                .cornerRadius(8)
+
+            Picker("XP Value", selection: $taskXP) {
+                ForEach(1..<101) { xp in
+                    Text("\(xp) XP").tag(xp)
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+            .padding()
+            .background(Color(UIColor.systemGray6))
+            .cornerRadius(8)
+
+            HStack {
+                Text("Task Frequency")
+                Picker("Reset Interval (days)", selection: $resetIntervalDays) {
+                    ForEach(1..<31) { day in
+                        Text("\(day) days").tag(day)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
             }
             .padding()
+            .background(Color(UIColor.systemGray6))
+            .cornerRadius(8)
 
-            if showAddTaskForm {
-                VStack(spacing: 20) {
-                    TextField("Task Name", text: $taskName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-                        .background(Color(UIColor.systemGray6))
-                        .cornerRadius(8)
-
-                    Picker("XP Value", selection: $taskXP) {
-                        ForEach(1..<101) { xp in
-                            Text("\(xp) XP").tag(xp)
-                        }
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                    .padding()
-                    .background(Color(UIColor.systemGray6))
-                    .cornerRadius(8)
-
+            HStack {
+                Button(action: {
+                    addTask()
+                    onTasksChange()
+                    showAddTaskForm = false
+                }) {
                     HStack {
-                        Text("Task Frequency")
-                        Picker("Reset Interval (days)", selection: $resetIntervalDays) {
-                            ForEach(1..<31) { day in
-                                Text("\(day) days").tag(day)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
+                        Image(systemName: "checkmark.circle")
+                            .imageScale(.large)
+                        Text("Add Task")
+                            .font(.headline)
                     }
                     .padding()
-                    .background(Color(UIColor.systemGray6))
+                    .background(Color.black)
+                    .foregroundColor(.white)
                     .cornerRadius(8)
+                }
 
-                    Button(action: addTask) {
-                        HStack {
-                            Image(systemName: "checkmark.circle")
-                                .imageScale(.large)
-                            Text("Add Task")
-                                .font(.headline)
-                        }
+                Button(action: {
+                    showAddTaskForm = false
+                }) {
+                    Text("Cancel")
                         .padding()
-                        .background(Color.black)
+                        .background(Color.gray)
                         .foregroundColor(.white)
                         .cornerRadius(8)
-                    }
-                    .padding()
                 }
-                .padding()
             }
+            .padding()
         }
+        .padding()
     }
 
     func addTask() {
@@ -77,8 +80,6 @@ struct AddTaskView: View {
             taskName = ""
             taskXP = 1
             resetIntervalDays = 1
-            onTasksChange()
-            showAddTaskForm = false // Hide the form after adding the task
         }
     }
 }

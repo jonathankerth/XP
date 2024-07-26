@@ -7,53 +7,97 @@ struct ContentView: View {
     @State private var maxXP: Int = 100
     @State private var reward: String = PersistenceManager.shared.loadReward()
 
-    @State private var showingRewardInput = false
+    @State private var showAddTaskForm = false
+    @State private var showAddRewardForm = false
+    @State private var showOptions = false
 
     var body: some View {
         NavigationView {
             VStack {
-                XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: reward)
-                TaskListView(tasks: $tasks, onTasksChange: saveTasks)
-                AddTaskView(tasks: $tasks, onTasksChange: saveTasks)
-                if reward.isEmpty {
-                    Button(action: {
-                        showingRewardInput = true
-                    }) {
-                        Text("Set Reward for Current Level")
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
+                HStack {
+                    NavigationLink(destination: ProfileView(tasks: tasks)) {
+                        HStack {
+                            Image(systemName: "person.circle")
+                                .imageScale(.large)
+                            Text("Profile")
+                                .font(.headline)
+                        }
+                        .padding()
+                        .background(Color.white)
+                        .foregroundColor(.black)
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray, lineWidth: 1)
+                        )
                     }
                     .padding()
-                    .sheet(isPresented: $showingRewardInput) {
-                        RewardInputView(reward: $reward, isPresented: $showingRewardInput)
+                    Spacer()
+                }
+
+                XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: reward)
+                TaskListView(tasks: $tasks, onTasksChange: saveTasks)
+
+                if !showAddTaskForm && !showAddRewardForm {
+                    Button(action: {
+                        showOptions.toggle()
+                    }) {
+                        Text(showOptions ? "-" : "+")
+                            .font(.system(size: 40, weight: .bold))
+                            .foregroundColor(.black)
                     }
-                } else {
+                    .padding()
+                }
+
+                if showOptions {
                     VStack {
-                        Text("Reward for Next Level: \(reward)")
-                            .padding()
                         Button(action: {
-                            showingRewardInput = true
+                            showAddTaskForm = true
+                            showAddRewardForm = false
+                            showOptions = false
                         }) {
-                            Text("Edit Reward")
+                            Text("Add Task")
                                 .padding()
-                                .background(Color.orange)
+                                .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(8)
                         }
-                        .padding()
-                        .sheet(isPresented: $showingRewardInput) {
-                            RewardInputView(reward: $reward, isPresented: $showingRewardInput)
+                        .padding(.bottom, 5)
+                        Button(action: {
+                            showAddRewardForm = true
+                            showAddTaskForm = false
+                            showOptions = false
+                        }) {
+                            Text("Add Reward")
+                                .padding()
+                                .background(Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
                         }
                     }
                 }
+
+                if showAddTaskForm {
+                    VStack(spacing: 20) {
+                        AddTaskView(tasks: $tasks, onTasksChange: {
+                            saveTasks()
+                        }, showAddTaskForm: $showAddTaskForm)
+                    }
+                    .padding()
+                }
+
+                if showAddRewardForm {
+                    VStack(spacing: 20) {
+                        RewardInputView(reward: $reward, isPresented: $showAddRewardForm)
+                    }
+                    .padding()
+                }
             }
-            .navigationTitle("XP App")
             .onAppear {
                 calculateAccumulatedXP()
                 resetTaskCompletionIfNeeded()
             }
+            .navigationTitle("")
         }
     }
 
