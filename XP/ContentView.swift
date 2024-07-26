@@ -19,7 +19,7 @@ struct ContentView: View {
                     Button(action: {
                         showingRewardInput = true
                     }) {
-                        Text("Set Reward for Next Level")
+                        Text("Set Reward for Current Level")
                             .padding()
                             .background(Color.blue)
                             .foregroundColor(.white)
@@ -49,7 +49,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("")
+            .navigationTitle("XP App")
             .onAppear {
                 calculateAccumulatedXP()
                 resetTaskCompletionIfNeeded()

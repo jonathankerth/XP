@@ -14,42 +14,56 @@ struct AddTaskView: View {
             Button(action: {
                 showAddTaskForm.toggle()
             }) {
-                Text(showAddTaskForm ? "Hide Add Task" : "Show Add Task")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                Text(showAddTaskForm ? "-" : "+")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundColor(.black)
             }
             .padding()
 
             if showAddTaskForm {
-                TextField("Task Name", text: $taskName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
+                VStack(spacing: 20) {
+                    TextField("Task Name", text: $taskName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                        .background(Color(UIColor.systemGray6))
+                        .cornerRadius(8)
 
-                Picker("XP Value", selection: $taskXP) {
-                    ForEach(1..<101) { xp in
-                        Text("\(xp) XP").tag(xp)
-                    }
-                }
-                .padding()
-
-                HStack {
-                    Text("Task Frequency")
-                    Picker("Reset Interval (days)", selection: $resetIntervalDays) {
-                        ForEach(1..<31) { day in
-                            Text("\(day) days").tag(day)
+                    Picker("XP Value", selection: $taskXP) {
+                        ForEach(1..<101) { xp in
+                            Text("\(xp) XP").tag(xp)
                         }
                     }
-                }
-                .padding()
+                    .pickerStyle(MenuPickerStyle())
+                    .padding()
+                    .background(Color(UIColor.systemGray6))
+                    .cornerRadius(8)
 
-                Button(action: addTask) {
-                    Text("Add Task")
+                    HStack {
+                        Text("Task Frequency")
+                        Picker("Reset Interval (days)", selection: $resetIntervalDays) {
+                            ForEach(1..<31) { day in
+                                Text("\(day) days").tag(day)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                    }
+                    .padding()
+                    .background(Color(UIColor.systemGray6))
+                    .cornerRadius(8)
+
+                    Button(action: addTask) {
+                        HStack {
+                            Image(systemName: "checkmark.circle")
+                                .imageScale(.large)
+                            Text("Add Task")
+                                .font(.headline)
+                        }
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.black)
                         .foregroundColor(.white)
                         .cornerRadius(8)
+                    }
+                    .padding()
                 }
                 .padding()
             }
