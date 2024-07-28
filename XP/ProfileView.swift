@@ -10,12 +10,6 @@ struct ProfileView: View {
     var body: some View {
         VStack {
             List {
-                Section(header: Text("Past Tasks")) {
-                    ForEach(tasks) { task in
-                        Text(task.name)
-                    }
-                }
-
                 Section(header: Text("Level Rewards")) {
                     ForEach(0..<66, id: \.self) { index in
                         VStack {
