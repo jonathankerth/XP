@@ -1,6 +1,7 @@
 import Foundation
+import SwiftUI
 
-struct XPTask: Identifiable, Codable {
+struct XPTask: Identifiable, Codable, Transferable {
     let id: UUID
     let name: String
     let xp: Int
@@ -15,5 +16,9 @@ struct XPTask: Identifiable, Codable {
         self.completed = completed
         self.resetIntervalDays = resetIntervalDays
         self.lastCompleted = lastCompleted
+    }
+
+    static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(contentType: .json)
     }
 }

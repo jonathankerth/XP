@@ -25,9 +25,9 @@ struct ContentView: View {
                         .padding()
                         .background(Color.white)
                         .foregroundColor(.black)
-                        .cornerRadius(8)
+                        .cornerRadius(20) // Rounded the corners more
                         .overlay(
-                            RoundedRectangle(cornerRadius: 8)
+                            RoundedRectangle(cornerRadius: 20) // Rounded the corners more
                                 .stroke(Color.gray, lineWidth: 1)
                         )
                     }
@@ -37,6 +37,7 @@ struct ContentView: View {
 
                 XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: currentReward)
                 TaskListView(tasks: $tasks, onTasksChange: saveTasks)
+                    .environment(\.editMode, .constant(.active)) // Enable reordering in the list
 
                 if !showAddTaskForm && !showAddRewardForm {
                     Button(action: {
@@ -60,7 +61,7 @@ struct ContentView: View {
                                 .padding()
                                 .background(Color.blue)
                                 .foregroundColor(.white)
-                                .cornerRadius(8)
+                                .cornerRadius(20) // Rounded the corners more
                         }
                         .padding(.bottom, 5)
                         Button(action: {
@@ -72,7 +73,7 @@ struct ContentView: View {
                                 .padding()
                                 .background(Color.green)
                                 .foregroundColor(.white)
-                                .cornerRadius(8)
+                                .cornerRadius(20) // Rounded the corners more
                         }
                     }
                 }
