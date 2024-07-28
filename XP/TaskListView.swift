@@ -23,9 +23,6 @@ struct TaskListView: View {
                                 Image(systemName: tasks[index].completed ? "checkmark.square" : "square")
                             }
                         }
-                        HStack {
-                            Text("Resets every \(task.resetIntervalDays) days")
-                        }
                     }
                     .padding()
                     .background(Color.white) // White background for each task

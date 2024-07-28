@@ -11,6 +11,7 @@ class PersistenceManager: ObservableObject {
     private let futureRewardsKey = "futureRewards"
     private let pastRewardsKey = "pastRewards"
     private let levelRewardsKey = "levelRewards"
+    private let lastResetDateKey = "lastResetDate"
     private let defaults = UserDefaults.standard
 
     @Published var levelRewards: [String] = []
@@ -102,5 +103,37 @@ class PersistenceManager: ObservableObject {
             }
         }
         return []
+    }
+
+    func resetUserData() {
+        saveLevel(1)
+        saveAccumulatedXP(0)
+    }
+
+    func endOfDayReset(tasks: inout [XPTask]) {
+        // Accumulate XP and reset tasks
+        let completedXP = tasks.filter { $0.completed }.reduce(0) { $0 + Int($1.xp) }
+        var totalXP = loadAccumulatedXP()
+        totalXP += completedXP
+        saveAccumulatedXP(totalXP)
+
+        // Reset task completion
+        tasks = tasks.map {
+            var task = $0
+            task.completed = false
+            task.lastCompleted = nil
+            return task
+        }
+
+        // Save updated tasks
+        saveTasks(tasks)
+    }
+
+    func getLastResetDate() -> Date? {
+        return defaults.object(forKey: lastResetDateKey) as? Date
+    }
+
+    func setLastResetDate(_ date: Date) {
+        defaults.set(date, forKey: lastResetDateKey)
     }
 }

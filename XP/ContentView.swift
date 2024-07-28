@@ -10,7 +10,6 @@ struct ContentView: View {
     @State private var showAddTaskForm = false
     @State private var showAddRewardForm = false
     @State private var showOptions = false
-    @State private var isEditing = false
 
     var body: some View {
         NavigationView {
@@ -26,9 +25,9 @@ struct ContentView: View {
                         .padding()
                         .background(Color.white)
                         .foregroundColor(.black)
-                        .cornerRadius(20) // Rounded the corners more
+                        .cornerRadius(20)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 20) // Rounded the corners more
+                            RoundedRectangle(cornerRadius: 20)
                                 .stroke(Color.gray, lineWidth: 1)
                         )
                     }
@@ -37,12 +36,6 @@ struct ContentView: View {
                 }
 
                 XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: currentReward)
-
-                HStack {
-                    Spacer()
-                    EditButton()
-                        .padding()
-                }
 
                 TaskListView(tasks: $tasks, onTasksChange: saveTasks)
 
@@ -68,7 +61,7 @@ struct ContentView: View {
                                 .padding()
                                 .background(Color.blue)
                                 .foregroundColor(.white)
-                                .cornerRadius(20) // Rounded the corners more
+                                .cornerRadius(20)
                         }
                         .padding(.bottom, 5)
                         Button(action: {
@@ -80,7 +73,7 @@ struct ContentView: View {
                                 .padding()
                                 .background(Color.green)
                                 .foregroundColor(.white)
-                                .cornerRadius(20) // Rounded the corners more
+                                .cornerRadius(20)
                         }
                     }
                 }
@@ -102,8 +95,8 @@ struct ContentView: View {
                 }
             }
             .onAppear {
+                endOfDayResetIfNeeded()
                 calculateAccumulatedXP()
-                resetTaskCompletionIfNeeded()
             }
             .navigationTitle("")
         }
@@ -131,8 +124,7 @@ struct ContentView: View {
     }
 
     private func calculateAccumulatedXP() {
-        let dailyXP = tasks.filter { $0.completed }.reduce(0) { $0 + $1.xp }
-        accumulatedXP += dailyXP
+        accumulatedXP = tasks.filter { $0.completed }.reduce(0) { $0 + Int($1.xp) }
         PersistenceManager.shared.saveAccumulatedXP(accumulatedXP)
         checkLevelUp()
     }
@@ -142,7 +134,7 @@ struct ContentView: View {
             level += 1
             accumulatedXP -= maxXP
             maxXP = calculateMaxXP(for: level)
-            PersistenceManager.shared.saveLevel(level)
+            persistenceManager.saveLevel(level)
             PersistenceManager.shared.saveAccumulatedXP(accumulatedXP)
         }
     }
@@ -151,16 +143,17 @@ struct ContentView: View {
         return 100 + (level - 1) * 50
     }
 
-    private func resetTaskCompletionIfNeeded() {
+    private func endOfDayResetIfNeeded() {
+        let calendar = Calendar.current
         let now = Date()
-        for index in tasks.indices {
-            if let lastCompleted = tasks[index].lastCompleted,
-               let resetInterval = Calendar.current.date(byAdding: .day, value: tasks[index].resetIntervalDays, to: lastCompleted),
-               now >= resetInterval {
-                tasks[index].completed = false
-                tasks[index].lastCompleted = nil
-            }
+        let startOfDay = calendar.startOfDay(for: now)
+
+        let lastResetDate = persistenceManager.getLastResetDate() ?? Date.distantPast
+        if calendar.isDateInToday(lastResetDate) {
+            return
         }
-        PersistenceManager.shared.saveTasks(tasks)
+
+        persistenceManager.endOfDayReset(tasks: &tasks)
+        persistenceManager.setLastResetDate(startOfDay)
     }
 }

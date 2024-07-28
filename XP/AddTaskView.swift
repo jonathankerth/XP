@@ -7,7 +7,6 @@ struct AddTaskView: View {
 
     @State private var taskName: String = ""
     @State private var taskXP: Int = 1
-    @State private var resetIntervalDays: Int = 1
 
     var body: some View {
         VStack(spacing: 20) {
@@ -23,19 +22,6 @@ struct AddTaskView: View {
                 }
             }
             .pickerStyle(MenuPickerStyle())
-            .padding()
-            .background(Color(UIColor.systemGray6))
-            .cornerRadius(8)
-
-            HStack {
-                Text("Task Frequency")
-                Picker("Reset Interval (days)", selection: $resetIntervalDays) {
-                    ForEach(1..<31) { day in
-                        Text("\(day) days").tag(day)
-                    }
-                }
-                .pickerStyle(MenuPickerStyle())
-            }
             .padding()
             .background(Color(UIColor.systemGray6))
             .cornerRadius(8)
@@ -75,11 +61,10 @@ struct AddTaskView: View {
 
     func addTask() {
         if !taskName.isEmpty {
-            let newTask = XPTask(name: taskName, xp: taskXP, resetIntervalDays: resetIntervalDays)
+            let newTask = XPTask(name: taskName, xp: taskXP)
             tasks.append(newTask)
             taskName = ""
             taskXP = 1
-            resetIntervalDays = 1
         }
     }
 }
