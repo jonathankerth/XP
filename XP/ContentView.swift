@@ -37,7 +37,7 @@ struct ContentView: View {
                 }
 
                 XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: currentReward)
-                
+
                 HStack {
                     Spacer()
                     EditButton()
@@ -45,7 +45,7 @@ struct ContentView: View {
                 }
 
                 TaskListView(tasks: $tasks, onTasksChange: saveTasks)
-                
+
                 if !showAddTaskForm && !showAddRewardForm {
                     Button(action: {
                         showOptions.toggle()
@@ -96,7 +96,7 @@ struct ContentView: View {
 
                 if showAddRewardForm {
                     VStack(spacing: 20) {
-                        RewardInputView(reward: Binding(get: { currentReward }, set: { persistenceManager.levelRewards[level - 1] = $0 }), isPresented: $showAddRewardForm)
+                        RewardInputView(reward: Binding(get: { currentReward }, set: { setReward($0) }), isPresented: $showAddRewardForm)
                     }
                     .padding()
                 }
@@ -115,6 +115,14 @@ struct ContentView: View {
         } else {
             return ""
         }
+    }
+
+    private func setReward(_ reward: String) {
+        while persistenceManager.levelRewards.count < level {
+            persistenceManager.levelRewards.append("")
+        }
+        persistenceManager.levelRewards[level - 1] = reward
+        persistenceManager.saveLevelRewards(persistenceManager.levelRewards)
     }
 
     private func saveTasks() {

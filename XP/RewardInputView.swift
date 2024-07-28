@@ -6,7 +6,7 @@ struct RewardInputView: View {
 
     var body: some View {
         VStack {
-            Text("Set Reward for Next Level")
+            Text("Set Reward for Current Level")
                 .font(.headline)
             TextField("Enter reward", text: $reward)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
