@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var showAddTaskForm = false
     @State private var showAddRewardForm = false
     @State private var showOptions = false
+    @State private var isEditing = false
 
     var body: some View {
         NavigationView {
@@ -36,9 +37,15 @@ struct ContentView: View {
                 }
 
                 XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: currentReward)
-                TaskListView(tasks: $tasks, onTasksChange: saveTasks)
-                    .environment(\.editMode, .constant(.active)) // Enable reordering in the list
+                
+                HStack {
+                    Spacer()
+                    EditButton()
+                        .padding()
+                }
 
+                TaskListView(tasks: $tasks, onTasksChange: saveTasks)
+                
                 if !showAddTaskForm && !showAddRewardForm {
                     Button(action: {
                         showOptions.toggle()

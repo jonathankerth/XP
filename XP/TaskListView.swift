@@ -9,18 +9,18 @@ struct TaskListView: View {
             Color(UIColor.systemGray6) // Grey background behind the tasks
                 .edgesIgnoringSafeArea(.all)
             List {
-                ForEach($tasks) { $task in
+                ForEach(Array(tasks.enumerated()), id: \.element.id) { index, task in
                     VStack(alignment: .leading, spacing: 10) { // Added spacing between tasks
                         HStack {
                             Text(task.name)
                             Spacer()
                             Text("\(task.xp) XP")
                             Button(action: {
-                                task.completed.toggle()
-                                task.lastCompleted = task.completed ? Date() : nil
+                                tasks[index].completed.toggle()
+                                tasks[index].lastCompleted = tasks[index].completed ? Date() : nil
                                 onTasksChange()
                             }) {
-                                Image(systemName: task.completed ? "checkmark.square" : "square")
+                                Image(systemName: tasks[index].completed ? "checkmark.square" : "square")
                             }
                         }
                         HStack {
@@ -32,10 +32,15 @@ struct TaskListView: View {
                     .cornerRadius(20) // Rounded the corners more
                     .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2) // Added shadow for better visual separation
                     .listRowSeparator(.hidden) // Remove the separator line between tasks
-                    .draggable(task) // Make the task draggable
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            deleteTask(at: IndexSet(integer: index))
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
                 }
                 .onMove(perform: moveTask) // Allow tasks to be moved
-                .onDelete(perform: deleteTask)
             }
             .listStyle(PlainListStyle()) // Ensure the list has no additional styling
         }
