@@ -1,19 +1,18 @@
 import SwiftUI
 
 struct RewardInputView: View {
-    @Binding var reward: String
-    @Binding var isPresented: Bool
+    @ObservedObject var viewModel: RewardInputViewModel
 
     var body: some View {
         VStack {
             Text("Set Reward for Current Level")
                 .font(.headline)
-            TextField("Enter reward", text: $reward)
+            TextField("Enter reward", text: $viewModel.reward)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
             HStack {
                 Button(action: {
-                    isPresented = false
+                    viewModel.cancel()
                 }) {
                     Text("Cancel")
                         .padding()
@@ -22,7 +21,7 @@ struct RewardInputView: View {
                         .cornerRadius(8)
                 }
                 Button(action: {
-                    isPresented = false
+                    viewModel.setReward()
                 }) {
                     Text("Set Reward")
                         .padding()

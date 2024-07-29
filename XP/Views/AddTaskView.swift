@@ -1,22 +1,17 @@
 import SwiftUI
 
 struct AddTaskView: View {
-    @Binding var tasks: [XPTask]
-    var onTasksChange: () -> Void
-    @Binding var showAddTaskForm: Bool
-
-    @State private var taskName: String = ""
-    @State private var taskXP: Int = 1
+    @ObservedObject var viewModel: AddTaskViewModel
 
     var body: some View {
         VStack(spacing: 20) {
-            TextField("Task Name", text: $taskName)
+            TextField("Task Name", text: $viewModel.taskName)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
                 .background(Color(UIColor.systemGray6))
                 .cornerRadius(8)
 
-            Picker("XP Value", selection: $taskXP) {
+            Picker("XP Value", selection: $viewModel.taskXP) {
                 ForEach(1..<101) { xp in
                     Text("\(xp) XP").tag(xp)
                 }
@@ -28,9 +23,7 @@ struct AddTaskView: View {
 
             HStack {
                 Button(action: {
-                    addTask()
-                    onTasksChange()
-                    showAddTaskForm = false
+                    viewModel.addTask()
                 }) {
                     HStack {
                         Image(systemName: "checkmark.circle")
@@ -45,7 +38,7 @@ struct AddTaskView: View {
                 }
 
                 Button(action: {
-                    showAddTaskForm = false
+                    viewModel.cancel()
                 }) {
                     Text("Cancel")
                         .padding()
@@ -57,14 +50,5 @@ struct AddTaskView: View {
             .padding()
         }
         .padding()
-    }
-
-    func addTask() {
-        if !taskName.isEmpty {
-            let newTask = XPTask(name: taskName, xp: taskXP)
-            tasks.append(newTask)
-            taskName = ""
-            taskXP = 1
-        }
     }
 }

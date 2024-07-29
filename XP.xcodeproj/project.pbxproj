@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		9C05371A2C536B180062AEDE /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C0537192C536B180062AEDE /* ProfileView.swift */; };
 		9C05371C2C536DAA0062AEDE /* OptionSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C05371B2C536DAA0062AEDE /* OptionSelectionView.swift */; };
+		9CAC4E532C584D15005CCEF2 /* RewardInputViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CAC4E522C584D15005CCEF2 /* RewardInputViewModel.swift */; };
+		9CAC4E552C584D64005CCEF2 /* AddTaskViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CAC4E542C584D64005CCEF2 /* AddTaskViewModel.swift */; };
+		9CAC4E572C584DC0005CCEF2 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CAC4E562C584DC0005CCEF2 /* ProfileViewModel.swift */; };
+		9CAC4E582C5860B0005CCEF2 /* XP.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 9CEF0EB62C50412C008E091B /* XP.entitlements */; };
 		9CEF0EAF2C50412B008E091B /* XPApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EAE2C50412B008E091B /* XPApp.swift */; };
 		9CEF0EB12C50412B008E091B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EB02C50412B008E091B /* ContentView.swift */; };
 		9CEF0EB32C50412B008E091B /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEF0EB22C50412B008E091B /* Item.swift */; };
@@ -45,6 +49,10 @@
 /* Begin PBXFileReference section */
 		9C0537192C536B180062AEDE /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		9C05371B2C536DAA0062AEDE /* OptionSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionSelectionView.swift; sourceTree = "<group>"; };
+		9CAC4E522C584D15005CCEF2 /* RewardInputViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardInputViewModel.swift; sourceTree = "<group>"; };
+		9CAC4E542C584D64005CCEF2 /* AddTaskViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTaskViewModel.swift; sourceTree = "<group>"; };
+		9CAC4E562C584DC0005CCEF2 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
+		9CAC4E592C58622A005CCEF2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9CEF0EAB2C50412B008E091B /* XP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9CEF0EAE2C50412B008E091B /* XPApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPApp.swift; sourceTree = "<group>"; };
 		9CEF0EB02C50412B008E091B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -90,6 +98,63 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9CAC4E4B2C584B32005CCEF2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				9C0537192C536B180062AEDE /* ProfileView.swift */,
+				9CEF0EE12C505C0A008E091B /* AddTaskView.swift */,
+				9CEF0EE52C50C537008E091B /* RewardInputView.swift */,
+				9CEF0EB02C50412B008E091B /* ContentView.swift */,
+				9C05371B2C536DAA0062AEDE /* OptionSelectionView.swift */,
+				9CEF0EDD2C505BD9008E091B /* XPBar.swift */,
+				9CEF0EDF2C505BF6008E091B /* TaskListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		9CAC4E4C2C584B4C005CCEF2 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				9CEF0EE32C505CE4008E091B /* XPTask.swift */,
+				9CEF0EB22C50412B008E091B /* Item.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		9CAC4E4D2C584B54005CCEF2 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				9CAC4E522C584D15005CCEF2 /* RewardInputViewModel.swift */,
+				9CAC4E542C584D64005CCEF2 /* AddTaskViewModel.swift */,
+				9CAC4E562C584DC0005CCEF2 /* ProfileViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		9CAC4E4E2C584B5B005CCEF2 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				9CEF0EDB2C505BC0008E091B /* PersistenceManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		9CAC4E502C584B71005CCEF2 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				9CEF0EAE2C50412B008E091B /* XPApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		9CAC4E512C584B77005CCEF2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				9CEF0EB62C50412C008E091B /* XP.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		9CEF0EA22C50412B008E091B = {
 			isa = PBXGroup;
 			children = (
@@ -113,19 +178,14 @@
 		9CEF0EAD2C50412B008E091B /* XP */ = {
 			isa = PBXGroup;
 			children = (
-				9CEF0EB02C50412B008E091B /* ContentView.swift */,
-				9C05371B2C536DAA0062AEDE /* OptionSelectionView.swift */,
-				9C0537192C536B180062AEDE /* ProfileView.swift */,
-				9CEF0EE52C50C537008E091B /* RewardInputView.swift */,
-				9CEF0EAE2C50412B008E091B /* XPApp.swift */,
-				9CEF0EB22C50412B008E091B /* Item.swift */,
-				9CEF0EDB2C505BC0008E091B /* PersistenceManager.swift */,
-				9CEF0EDD2C505BD9008E091B /* XPBar.swift */,
-				9CEF0EE32C505CE4008E091B /* XPTask.swift */,
-				9CEF0EDF2C505BF6008E091B /* TaskListView.swift */,
-				9CEF0EE12C505C0A008E091B /* AddTaskView.swift */,
+				9CAC4E592C58622A005CCEF2 /* Info.plist */,
+				9CAC4E512C584B77005CCEF2 /* Resources */,
+				9CAC4E502C584B71005CCEF2 /* App */,
+				9CAC4E4E2C584B5B005CCEF2 /* Services */,
+				9CAC4E4D2C584B54005CCEF2 /* ViewModels */,
+				9CAC4E4C2C584B4C005CCEF2 /* Models */,
+				9CAC4E4B2C584B32005CCEF2 /* Views */,
 				9CEF0EB42C50412C008E091B /* Assets.xcassets */,
-				9CEF0EB62C50412C008E091B /* XP.entitlements */,
 				9CEF0EB72C50412C008E091B /* Preview Content */,
 			);
 			path = XP;
@@ -260,6 +320,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9CAC4E582C5860B0005CCEF2 /* XP.entitlements in Resources */,
 				9CEF0EB92C50412C008E091B /* Preview Assets.xcassets in Resources */,
 				9CEF0EB52C50412C008E091B /* Assets.xcassets in Resources */,
 			);
@@ -288,8 +349,11 @@
 			files = (
 				9CEF0EDE2C505BD9008E091B /* XPBar.swift in Sources */,
 				9CEF0EE22C505C0A008E091B /* AddTaskView.swift in Sources */,
+				9CAC4E552C584D64005CCEF2 /* AddTaskViewModel.swift in Sources */,
+				9CAC4E532C584D15005CCEF2 /* RewardInputViewModel.swift in Sources */,
 				9C05371A2C536B180062AEDE /* ProfileView.swift in Sources */,
 				9CEF0EE42C505CE4008E091B /* XPTask.swift in Sources */,
+				9CAC4E572C584DC0005CCEF2 /* ProfileViewModel.swift in Sources */,
 				9CEF0EB12C50412B008E091B /* ContentView.swift in Sources */,
 				9CEF0EB32C50412B008E091B /* Item.swift in Sources */,
 				9C05371C2C536DAA0062AEDE /* OptionSelectionView.swift in Sources */,
@@ -460,6 +524,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = XP/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -498,6 +563,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = XP/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

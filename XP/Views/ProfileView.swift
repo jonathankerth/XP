@@ -1,11 +1,8 @@
 import SwiftUI
 
 struct ProfileView: View {
-    var tasks: [XPTask]
+    @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.presentationMode) var presentationMode
-
-    @StateObject private var persistenceManager = PersistenceManager.shared
-    @State private var editIndex: Int? = nil
 
     var body: some View {
         VStack {
@@ -16,38 +13,33 @@ struct ProfileView: View {
                             HStack {
                                 Text("Level \(index + 1)")
                                 Spacer()
-                                if editIndex == index {
+                                if viewModel.editIndex == index {
                                     Button("Close") {
-                                        saveReward(index: index)
-                                        editIndex = nil
+                                        viewModel.closeEdit()
                                     }
                                 } else {
                                     Button("Edit") {
-                                        editIndex = index
+                                        viewModel.editReward(at: index)
                                     }
                                 }
                             }
-                            if editIndex == index {
+                            if viewModel.editIndex == index {
                                 TextField("Reward", text: Binding(
                                     get: {
-                                        if index < persistenceManager.levelRewards.count {
-                                            return persistenceManager.levelRewards[index]
+                                        if index < viewModel.levelRewards.count {
+                                            return viewModel.levelRewards[index]
                                         } else {
                                             return ""
                                         }
                                     },
                                     set: {
-                                        if index < persistenceManager.levelRewards.count {
-                                            persistenceManager.levelRewards[index] = $0
-                                        } else {
-                                            persistenceManager.levelRewards.append($0)
-                                        }
+                                        viewModel.updateReward(at: index, with: $0)
                                     }
                                 ))
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                             } else {
-                                if index < persistenceManager.levelRewards.count && !persistenceManager.levelRewards[index].isEmpty {
-                                    Text(persistenceManager.levelRewards[index])
+                                if index < viewModel.levelRewards.count && !viewModel.levelRewards[index].isEmpty {
+                                    Text(viewModel.levelRewards[index])
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
                                 }
@@ -62,9 +54,5 @@ struct ProfileView: View {
                 presentationMode.wrappedValue.dismiss()
             })
         }
-    }
-
-    private func saveReward(index: Int) {
-        persistenceManager.saveLevelRewards(persistenceManager.levelRewards)
     }
 }

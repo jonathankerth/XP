@@ -15,7 +15,7 @@ struct ContentView: View {
         NavigationView {
             VStack {
                 HStack {
-                    NavigationLink(destination: ProfileView(tasks: tasks)) {
+                    NavigationLink(destination: ProfileView(viewModel: ProfileViewModel(tasks: tasks, persistenceManager: persistenceManager))) {
                         HStack {
                             Image(systemName: "person.circle")
                                 .imageScale(.large)
@@ -80,16 +80,23 @@ struct ContentView: View {
 
                 if showAddTaskForm {
                     VStack(spacing: 20) {
-                        AddTaskView(tasks: $tasks, onTasksChange: {
-                            saveTasks()
-                        }, showAddTaskForm: $showAddTaskForm)
+                        AddTaskView(viewModel: AddTaskViewModel(
+                            tasks: tasks,
+                            showAddTaskForm: showAddTaskForm,
+                            onTasksChange: saveTasks
+                        ))
                     }
                     .padding()
                 }
 
                 if showAddRewardForm {
                     VStack(spacing: 20) {
-                        RewardInputView(reward: Binding(get: { currentReward }, set: { setReward($0) }), isPresented: $showAddRewardForm)
+                        RewardInputView(viewModel: RewardInputViewModel(
+                            reward: currentReward,
+                            isPresented: showAddRewardForm,
+                            level: level,
+                            persistenceManager: persistenceManager
+                        ))
                     }
                     .padding()
                 }
@@ -108,14 +115,6 @@ struct ContentView: View {
         } else {
             return ""
         }
-    }
-
-    private func setReward(_ reward: String) {
-        while persistenceManager.levelRewards.count < level {
-            persistenceManager.levelRewards.append("")
-        }
-        persistenceManager.levelRewards[level - 1] = reward
-        persistenceManager.saveLevelRewards(persistenceManager.levelRewards)
     }
 
     private func saveTasks() {
