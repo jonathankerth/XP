@@ -1,22 +1,30 @@
 import SwiftUI
 
 struct SignUpView: View {
-    @StateObject private var viewModel = SignUpViewModel()
-    @Binding var isAuthenticated: Bool
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         VStack {
-            TextField("Email", text: $viewModel.email)
+            TextField("Email", text: $authViewModel.email)
                 .keyboardType(.emailAddress)
                 .autocapitalization(.none)
                 .padding()
                 .background(Color(.secondarySystemBackground))
                 .cornerRadius(8)
-            SecureField("Password", text: $viewModel.password)
+            SecureField("Password", text: $authViewModel.password)
                 .padding()
                 .background(Color(.secondarySystemBackground))
                 .cornerRadius(8)
-            Button(action: { viewModel.signUp { success in isAuthenticated = success } }) {
+            Button(action: {
+                authViewModel.signUp { success in
+                    if success {
+                        dismiss()
+                    } else {
+                        // Handle sign-up failure
+                    }
+                }
+            }) {
                 Text("Sign Up")
                     .frame(maxWidth: .infinity)
                     .padding()

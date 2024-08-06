@@ -5,7 +5,7 @@ struct ContentView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             if authViewModel.isAuthenticated {
                 MainContentView()
                     .environmentObject(authViewModel)

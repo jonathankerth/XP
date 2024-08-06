@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SignInView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @State private var showSignUp = false
 
     var body: some View {
         VStack {
@@ -31,21 +32,15 @@ struct SignInView: View {
             .padding()
 
             Button(action: {
-                authViewModel.signUp { success in
-                    if success {
-                        // Handle successful sign-up
-                    } else {
-                        // Handle sign-up failure
-                    }
-                }
+                showSignUp = true
             }) {
-                Text("Sign Up")
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                Text("Don't have an account? Sign up here.")
+                    .foregroundColor(.blue)
             }
             .padding()
+            .navigationDestination(isPresented: $showSignUp) {
+                SignUpView()
+            }
         }
         .padding()
     }

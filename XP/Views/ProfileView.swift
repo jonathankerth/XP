@@ -1,12 +1,19 @@
 import SwiftUI
+import FirebaseAuth
 
 struct ProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var authViewModel: AuthViewModel
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         VStack {
+            if let user = Auth.auth().currentUser {
+                Text("Hello, \(user.email ?? "User")")
+                    .font(.headline)
+                    .padding()
+            }
             List {
                 Section(header: Text("Level Rewards")) {
                     ForEach(0..<66, id: \.self) { index in
@@ -57,6 +64,7 @@ struct ProfileView: View {
                 },
                 trailing: Button("Sign Out") {
                     authViewModel.signOut()
+                    dismiss()
                 }
             )
         }

@@ -24,8 +24,9 @@ class AuthViewModel: ObservableObject {
                 print(error.localizedDescription)
                 completion(false)
             } else {
-                self.isAuthenticated = true
-                completion(true)
+                self.signIn { signInSuccess in
+                    completion(signInSuccess)
+                }
             }
         }
     }
