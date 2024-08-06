@@ -6,11 +6,11 @@ struct TaskListView: View {
 
     var body: some View {
         ZStack {
-            Color(UIColor.systemGray6) // Grey background behind the tasks
+            Color(UIColor.systemGray6)
                 .edgesIgnoringSafeArea(.all)
             List {
                 ForEach(Array(tasks.enumerated()), id: \.element.id) { index, task in
-                    VStack(alignment: .leading, spacing: 10) { // Added spacing between tasks
+                    VStack(alignment: .leading, spacing: 10) {
                         HStack {
                             Text(task.name)
                             Spacer()
@@ -25,10 +25,10 @@ struct TaskListView: View {
                         }
                     }
                     .padding()
-                    .background(Color.white) // White background for each task
-                    .cornerRadius(20) // Rounded the corners more
-                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2) // Added shadow for better visual separation
-                    .listRowSeparator(.hidden) // Remove the separator line between tasks
+                    .background(Color.white)
+                    .cornerRadius(20)
+                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                    .listRowSeparator(.hidden)
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             deleteTask(at: IndexSet(integer: index))
@@ -37,9 +37,9 @@ struct TaskListView: View {
                         }
                     }
                 }
-                .onMove(perform: moveTask) // Allow tasks to be moved
+                .onMove(perform: moveTask)
             }
-            .listStyle(PlainListStyle()) // Ensure the list has no additional styling
+            .listStyle(PlainListStyle())
         }
     }
 

@@ -14,12 +14,12 @@ struct XPBar: View {
                 .font(.headline)
             ProgressView(value: Double(totalXP), total: Double(maxXP))
                 .progressViewStyle(LinearProgressViewStyle())
-                .padding()
+                .padding([.leading, .trailing])
             if !reward.isEmpty {
                 Text("Reward: \(reward)")
                     .font(.subheadline)
-                    .padding()
             }
         }
+        .padding([.leading, .trailing])
     }
 }

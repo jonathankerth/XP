@@ -3,6 +3,7 @@ import SwiftUI
 struct ProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject var authViewModel: AuthViewModel
 
     var body: some View {
         VStack {
@@ -50,9 +51,14 @@ struct ProfileView: View {
             }
             .listStyle(GroupedListStyle())
             .navigationBarTitle("Profile", displayMode: .inline)
-            .navigationBarItems(leading: Button("Home") {
-                presentationMode.wrappedValue.dismiss()
-            })
+            .navigationBarItems(
+                leading: Button("Home") {
+                    presentationMode.wrappedValue.dismiss()
+                },
+                trailing: Button("Sign Out") {
+                    authViewModel.signOut()
+                }
+            )
         }
     }
 }
