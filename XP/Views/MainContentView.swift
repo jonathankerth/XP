@@ -44,6 +44,7 @@ struct MainContentView: View {
 
                 TaskListView(tasks: $tasks, onTasksChange: saveTasks)
                     .padding(.top, 10)
+                    .environmentObject(authViewModel)
 
                 if !showAddTaskForm && !showAddRewardForm {
                     Button(action: {
@@ -89,7 +90,8 @@ struct MainContentView: View {
                         AddTaskView(viewModel: AddTaskViewModel(
                             tasks: $tasks,
                             showAddTaskForm: $showAddTaskForm,
-                            onTasksChange: saveTasks
+                            onTasksChange: saveTasks,
+                            authViewModel: authViewModel
                         ))
                     }
                     .padding()
@@ -102,7 +104,8 @@ struct MainContentView: View {
                             isPresented: $showAddRewardForm,
                             showOptions: $showOptions,
                             level: level,
-                            persistenceManager: persistenceManager
+                            persistenceManager: persistenceManager,
+                            authViewModel: authViewModel
                         ))
                     }
                     .padding()
@@ -112,7 +115,14 @@ struct MainContentView: View {
         .onAppear {
             endOfDayResetIfNeeded()
             calculateAccumulatedXP()
-            persistenceManager.syncTasksWithFirebase()
+            if let userID = authViewModel.currentUser?.uid {
+                persistenceManager.syncUserData(userID: userID)
+            }
+        }
+        .onDisappear {
+            if let userID = authViewModel.currentUser?.uid {
+                persistenceManager.saveUserDataToFirestore(userID: userID)
+            }
         }
         .navigationTitle("")
         .navigationBarHidden(true)
@@ -127,8 +137,11 @@ struct MainContentView: View {
     }
 
     private func saveTasks() {
-        PersistenceManager.shared.saveTasks(tasks)
-        calculateAccumulatedXP()
+        if let userID = authViewModel.currentUser?.uid {
+            PersistenceManager.shared.saveTasks(tasks)
+            calculateAccumulatedXP()
+            PersistenceManager.shared.saveUserDataToFirestore(userID: userID)
+        }
     }
 
     private func calculateAccumulatedXP() {
@@ -142,9 +155,10 @@ struct MainContentView: View {
             level += 1
             accumulatedXP -= maxXP
             maxXP = calculateMaxXP(for: level)
-            persistenceManager.saveLevel(level)
+            PersistenceManager.shared.saveLevel(level)
             PersistenceManager.shared.saveAccumulatedXP(accumulatedXP)
         }
+        updateXPAndLevelInFirestore()
     }
 
     private func calculateMaxXP(for level: Int) -> Int {
@@ -156,12 +170,18 @@ struct MainContentView: View {
         let now = Date()
         let startOfDay = calendar.startOfDay(for: now)
 
-        let lastResetDate = persistenceManager.getLastResetDate() ?? Date.distantPast
+        let lastResetDate = PersistenceManager.shared.getLastResetDate() ?? Date.distantPast
         if calendar.isDateInToday(lastResetDate) {
             return
         }
 
-        persistenceManager.endOfDayReset(tasks: &tasks)
-        persistenceManager.setLastResetDate(startOfDay)
+        PersistenceManager.shared.endOfDayReset(tasks: &tasks)
+        PersistenceManager.shared.setLastResetDate(startOfDay)
+    }
+
+    private func updateXPAndLevelInFirestore() {
+        if let userID = authViewModel.currentUser?.uid {
+            PersistenceManager.shared.saveUserDataToFirestore(userID: userID)
+        }
     }
 }

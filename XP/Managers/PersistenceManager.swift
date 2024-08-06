@@ -3,13 +3,11 @@ import Combine
 
 class PersistenceManager: ObservableObject {
     static let shared = PersistenceManager()
-    
+
     private let tasksKey = "tasks"
     private let accumulatedXPKey = "accumulatedXP"
     private let levelKey = "level"
-    private let rewardKey = "reward"
-    private let futureRewardsKey = "futureRewards"
-    private let pastRewardsKey = "pastRewards"
+    private let rewardsKey = "rewards"
     private let levelRewardsKey = "levelRewards"
     private let lastResetDateKey = "lastResetDate"
     private let defaults = UserDefaults.standard
@@ -54,37 +52,14 @@ class PersistenceManager: ObservableObject {
         return defaults.integer(forKey: levelKey)
     }
 
-    func saveReward(_ reward: String) {
-        defaults.set(reward, forKey: rewardKey)
-    }
-
-    func loadReward() -> String {
-        return defaults.string(forKey: rewardKey) ?? ""
-    }
-
-    func saveFutureRewards(_ rewards: [String]) {
+    func saveRewards(_ rewards: [String]) {
         if let encoded = try? JSONEncoder().encode(rewards) {
-            defaults.set(encoded, forKey: futureRewardsKey)
+            defaults.set(encoded, forKey: rewardsKey)
         }
     }
 
-    func loadFutureRewards() -> [String] {
-        if let savedRewards = defaults.data(forKey: futureRewardsKey) {
-            if let decodedRewards = try? JSONDecoder().decode([String].self, from: savedRewards) {
-                return decodedRewards
-            }
-        }
-        return []
-    }
-
-    func savePastRewards(_ rewards: [String]) {
-        if let encoded = try? JSONEncoder().encode(rewards) {
-            defaults.set(encoded, forKey: pastRewardsKey)
-        }
-    }
-
-    func loadPastRewards() -> [String] {
-        if let savedRewards = defaults.data(forKey: pastRewardsKey) {
+    func loadRewards() -> [String] {
+        if let savedRewards = defaults.data(forKey: rewardsKey) {
             if let decodedRewards = try? JSONDecoder().decode([String].self, from: savedRewards) {
                 return decodedRewards
             }
@@ -96,7 +71,7 @@ class PersistenceManager: ObservableObject {
         if let encoded = try? JSONEncoder().encode(rewards) {
             defaults.set(encoded, forKey: levelRewardsKey)
         }
-        levelRewards = rewards
+        self.levelRewards = rewards
     }
 
     func loadLevelRewards() -> [String] {
@@ -141,8 +116,18 @@ class PersistenceManager: ObservableObject {
     }
 
     // Firestore sync functions
-    func syncTasksWithFirebase() {
-        FirestoreManager.shared.fetchTasks { tasks, error in
+    func syncUserData(userID: String) {
+        FirestoreManager.shared.fetchUserXPAndLevel(userID: userID) { xp, level, rewards, error in
+            if let xp = xp, let level = level, let rewards = rewards {
+                self.saveAccumulatedXP(xp)
+                self.saveLevel(level)
+                self.saveRewards(rewards)
+            } else if let error = error {
+                print("Error fetching user XP and level from Firebase: \(error)")
+            }
+        }
+
+        FirestoreManager.shared.fetchTasks(userID: userID) { tasks, error in
             if let tasks = tasks {
                 self.saveTasks(tasks)
             } else if let error = error {
@@ -151,21 +136,40 @@ class PersistenceManager: ObservableObject {
         }
     }
 
-    func addTask(_ task: XPTask) {
+    func saveUserDataToFirestore(userID: String) {
+        let xp = loadAccumulatedXP()
+        let level = loadLevel()
+        let rewards = loadRewards()
+        FirestoreManager.shared.saveUserXPAndLevel(userID: userID, xp: xp, level: level, rewards: rewards) { error in
+            if let error = error {
+                print("Error saving user XP and level to Firebase: \(error)")
+            }
+        }
+
+        tasks.forEach { task in
+            FirestoreManager.shared.saveTask(userID: userID, task: task) { error in
+                if let error = error {
+                    print("Error saving task to Firebase: \(error)")
+                }
+            }
+        }
+    }
+
+    func addTask(userID: String, task: XPTask) {
         tasks.append(task)
         saveTasks(tasks)
-        FirestoreManager.shared.saveTask(task) { error in
+        FirestoreManager.shared.saveTask(userID: userID, task: task) { error in
             if let error = error {
                 print("Error adding task to Firebase: \(error)")
             }
         }
     }
 
-    func updateTask(_ task: XPTask) {
+    func updateTask(userID: String, task: XPTask) {
         if let index = tasks.firstIndex(where: { $0.id == task.id }) {
             tasks[index] = task
             saveTasks(tasks)
-            FirestoreManager.shared.updateTask(task) { error in
+            FirestoreManager.shared.updateTask(userID: userID, task: task) { error in
                 if let error = error {
                     print("Error updating task in Firebase: \(error)")
                 }
@@ -173,12 +177,20 @@ class PersistenceManager: ObservableObject {
         }
     }
 
-    func deleteTask(_ taskID: String) {
+    func deleteTask(userID: String, taskID: String) {
         tasks.removeAll { $0.id == taskID }
         saveTasks(tasks)
-        FirestoreManager.shared.deleteTask(taskID) { error in
+        FirestoreManager.shared.deleteTask(userID: userID, taskId: taskID) { error in
             if let error = error {
                 print("Error deleting task from Firebase: \(error)")
+            }
+        }
+    }
+
+    func saveLevelReward(userID: String, level: Int, reward: String) {
+        FirestoreManager.shared.saveLevelReward(userID: userID, level: level, reward: reward) { error in
+            if let error = error {
+                print("Error saving level reward to Firebase: \(error)")
             }
         }
     }

@@ -3,13 +3,15 @@ import SwiftUI
 struct TaskListView: View {
     @Binding var tasks: [XPTask]
     var onTasksChange: () -> Void
+    @EnvironmentObject var authViewModel: AuthViewModel
 
     var body: some View {
         ZStack {
             Color(UIColor.systemGray6)
                 .edgesIgnoringSafeArea(.all)
             List {
-                ForEach(Array(tasks.enumerated()), id: \.element.id) { index, task in
+                ForEach(tasks.indices, id: \.self) { index in
+                    let task = tasks[index]
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
                             Text(task.name)
@@ -19,7 +21,9 @@ struct TaskListView: View {
                                 tasks[index].completed.toggle()
                                 tasks[index].lastCompleted = tasks[index].completed ? Date() : nil
                                 onTasksChange()
-                                PersistenceManager.shared.updateTask(tasks[index])
+                                if let userID = authViewModel.currentUser?.uid {
+                                    PersistenceManager.shared.updateTask(userID: userID, task: tasks[index])
+                                }
                             }) {
                                 Image(systemName: tasks[index].completed ? "checkmark.square" : "square")
                             }
@@ -49,7 +53,9 @@ struct TaskListView: View {
 
     func deleteTask(at offsets: IndexSet) {
         offsets.forEach { index in
-            PersistenceManager.shared.deleteTask(tasks[index].id)
+            if let userID = authViewModel.currentUser?.uid {
+                PersistenceManager.shared.deleteTask(userID: userID, taskID: tasks[index].id)
+            }
         }
         tasks.remove(atOffsets: offsets)
         onTasksChange()

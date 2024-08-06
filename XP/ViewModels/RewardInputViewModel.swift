@@ -7,13 +7,15 @@ class RewardInputViewModel: ObservableObject {
 
     private let level: Int
     private let persistenceManager: PersistenceManager
+    var authViewModel: AuthViewModel
 
-    init(reward: String, isPresented: Binding<Bool>, showOptions: Binding<Bool>, level: Int, persistenceManager: PersistenceManager) {
+    init(reward: String, isPresented: Binding<Bool>, showOptions: Binding<Bool>, level: Int, persistenceManager: PersistenceManager, authViewModel: AuthViewModel) {
         self.reward = reward
         self._isPresented = isPresented
         self._showOptions = showOptions
         self.level = level
         self.persistenceManager = persistenceManager
+        self.authViewModel = authViewModel
     }
 
     func cancel() {
@@ -24,6 +26,11 @@ class RewardInputViewModel: ObservableObject {
     func setReward() {
         if level - 1 < persistenceManager.levelRewards.count {
             persistenceManager.levelRewards[level - 1] = reward
+        } else {
+            persistenceManager.levelRewards.append(reward)
+        }
+        if let userID = authViewModel.currentUser?.uid {
+            persistenceManager.saveLevelReward(userID: userID, level: level, reward: reward)
         }
         isPresented = false
         showOptions = true

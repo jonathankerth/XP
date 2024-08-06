@@ -7,18 +7,22 @@ class AddTaskViewModel: ObservableObject {
     var tasks: Binding<[XPTask]>
     var showAddTaskForm: Binding<Bool>
     var onTasksChange: () -> Void
+    var authViewModel: AuthViewModel
 
-    init(tasks: Binding<[XPTask]>, showAddTaskForm: Binding<Bool>, onTasksChange: @escaping () -> Void) {
+    init(tasks: Binding<[XPTask]>, showAddTaskForm: Binding<Bool>, onTasksChange: @escaping () -> Void, authViewModel: AuthViewModel) {
         self.tasks = tasks
         self.showAddTaskForm = showAddTaskForm
         self.onTasksChange = onTasksChange
+        self.authViewModel = authViewModel
     }
 
     func addTask() {
         if !taskName.isEmpty {
             let newTask = XPTask(id: UUID().uuidString, name: taskName, xp: taskXP, completed: false, lastCompleted: nil)
             tasks.wrappedValue.append(newTask)
-            PersistenceManager.shared.addTask(newTask)
+            if let userID = authViewModel.currentUser?.uid {
+                PersistenceManager.shared.addTask(userID: userID, task: newTask)
+            }
             taskName = ""
             taskXP = 1
             onTasksChange()

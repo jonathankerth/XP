@@ -5,6 +5,11 @@ class AuthViewModel: ObservableObject {
     @Published var email = ""
     @Published var password = ""
     @Published var isAuthenticated = Auth.auth().currentUser != nil
+    @Published var currentUser: User?
+
+    init() {
+        self.currentUser = Auth.auth().currentUser
+    }
 
     func signIn(completion: @escaping (Bool) -> Void) {
         Auth.auth().signIn(withEmail: email, password: password) { (result, error) in
@@ -13,6 +18,7 @@ class AuthViewModel: ObservableObject {
                 completion(false)
             } else {
                 self.isAuthenticated = true
+                self.currentUser = result?.user
                 completion(true)
             }
         }
@@ -35,6 +41,7 @@ class AuthViewModel: ObservableObject {
         do {
             try Auth.auth().signOut()
             self.isAuthenticated = false
+            self.currentUser = nil
         } catch let error {
             print("Failed to sign out: \(error.localizedDescription)")
         }
