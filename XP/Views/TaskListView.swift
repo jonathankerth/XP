@@ -19,6 +19,7 @@ struct TaskListView: View {
                                 tasks[index].completed.toggle()
                                 tasks[index].lastCompleted = tasks[index].completed ? Date() : nil
                                 onTasksChange()
+                                PersistenceManager.shared.updateTask(tasks[index])
                             }) {
                                 Image(systemName: tasks[index].completed ? "checkmark.square" : "square")
                             }
@@ -47,6 +48,9 @@ struct TaskListView: View {
     }
 
     func deleteTask(at offsets: IndexSet) {
+        offsets.forEach { index in
+            PersistenceManager.shared.deleteTask(tasks[index].id)
+        }
         tasks.remove(atOffsets: offsets)
         onTasksChange()
     }

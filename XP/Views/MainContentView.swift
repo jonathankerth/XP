@@ -3,7 +3,7 @@ import FirebaseAuth
 
 struct MainContentView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-    @State private var tasks: [XPTask] = PersistenceManager.shared.loadTasks()
+    @State private var tasks: [XPTask] = PersistenceManager.shared.tasks
     @State private var accumulatedXP: Int = PersistenceManager.shared.loadAccumulatedXP()
     @State private var level: Int = max(1, PersistenceManager.shared.loadLevel())
     @State private var maxXP: Int = 100
@@ -112,6 +112,7 @@ struct MainContentView: View {
         .onAppear {
             endOfDayResetIfNeeded()
             calculateAccumulatedXP()
+            persistenceManager.syncTasksWithFirebase()
         }
         .navigationTitle("")
         .navigationBarHidden(true)

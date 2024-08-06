@@ -16,8 +16,9 @@ class AddTaskViewModel: ObservableObject {
 
     func addTask() {
         if !taskName.isEmpty {
-            let newTask = XPTask(name: taskName, xp: taskXP)
+            let newTask = XPTask(id: UUID().uuidString, name: taskName, xp: taskXP, completed: false, lastCompleted: nil)
             tasks.wrappedValue.append(newTask)
+            PersistenceManager.shared.addTask(newTask)
             taskName = ""
             taskXP = 1
             onTasksChange()

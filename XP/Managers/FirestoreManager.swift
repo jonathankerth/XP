@@ -10,7 +10,7 @@ class FirestoreManager: ObservableObject {
         do {
             let data = try JSONEncoder().encode(task)
             let json = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
-            let _ = db.collection("tasks").addDocument(data: json) { error in
+            db.collection("tasks").document(task.id).setData(json) { error in
                 completion(error)
             }
         } catch let error {
@@ -44,11 +44,7 @@ class FirestoreManager: ObservableObject {
         do {
             let data = try JSONEncoder().encode(task)
             let json = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
-            guard let taskId = task.id else {
-                completion(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Task ID is nil"]))
-                return
-            }
-            db.collection("tasks").document(taskId).setData(json) { error in
+            db.collection("tasks").document(task.id).setData(json) { error in
                 completion(error)
             }
         } catch let error {

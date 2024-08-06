@@ -26,6 +26,6 @@ class RewardInputViewModel: ObservableObject {
             persistenceManager.levelRewards[level - 1] = reward
         }
         isPresented = false
-        showOptions = false
+        showOptions = true
     }
 }
