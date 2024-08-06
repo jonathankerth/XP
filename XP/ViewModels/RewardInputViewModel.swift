@@ -1,29 +1,31 @@
-import Foundation
+import SwiftUI
 
 class RewardInputViewModel: ObservableObject {
-    @Published var reward: String = ""
-    @Published var isPresented: Bool = false
+    @Published var reward: String
+    @Binding var isPresented: Bool
+    @Binding var showOptions: Bool
 
-    private var level: Int
-    private var persistenceManager: PersistenceManager
+    private let level: Int
+    private let persistenceManager: PersistenceManager
 
-    init(reward: String, isPresented: Bool, level: Int, persistenceManager: PersistenceManager) {
+    init(reward: String, isPresented: Binding<Bool>, showOptions: Binding<Bool>, level: Int, persistenceManager: PersistenceManager) {
         self.reward = reward
-        self.isPresented = isPresented
+        self._isPresented = isPresented
+        self._showOptions = showOptions
         self.level = level
         self.persistenceManager = persistenceManager
     }
 
     func cancel() {
         isPresented = false
+        showOptions = true // Reset to options view
     }
 
     func setReward() {
-        while persistenceManager.levelRewards.count < level {
-            persistenceManager.levelRewards.append("")
+        if level - 1 < persistenceManager.levelRewards.count {
+            persistenceManager.levelRewards[level - 1] = reward
         }
-        persistenceManager.levelRewards[level - 1] = reward
-        persistenceManager.saveLevelRewards(persistenceManager.levelRewards)
         isPresented = false
+        showOptions = false
     }
 }

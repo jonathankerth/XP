@@ -1,14 +1,14 @@
+import SwiftUI
 import Foundation
 
 class AddTaskViewModel: ObservableObject {
     @Published var taskName: String = ""
     @Published var taskXP: Int = 1
-    @Published var tasks: [XPTask]
-    @Published var showAddTaskForm: Bool
-
+    var tasks: Binding<[XPTask]>
+    var showAddTaskForm: Binding<Bool>
     var onTasksChange: () -> Void
 
-    init(tasks: [XPTask], showAddTaskForm: Bool, onTasksChange: @escaping () -> Void) {
+    init(tasks: Binding<[XPTask]>, showAddTaskForm: Binding<Bool>, onTasksChange: @escaping () -> Void) {
         self.tasks = tasks
         self.showAddTaskForm = showAddTaskForm
         self.onTasksChange = onTasksChange
@@ -17,15 +17,15 @@ class AddTaskViewModel: ObservableObject {
     func addTask() {
         if !taskName.isEmpty {
             let newTask = XPTask(name: taskName, xp: taskXP)
-            tasks.append(newTask)
+            tasks.wrappedValue.append(newTask)
             taskName = ""
             taskXP = 1
             onTasksChange()
-            showAddTaskForm = false
+            showAddTaskForm.wrappedValue = false
         }
     }
 
     func cancel() {
-        showAddTaskForm = false
+        showAddTaskForm.wrappedValue = false
     }
 }

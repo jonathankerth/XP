@@ -40,6 +40,9 @@ struct TaskListView: View {
                 .onMove(perform: moveTask)
             }
             .listStyle(PlainListStyle())
+            .onAppear {
+                print("Task list is now visible with \(tasks.count) tasks.")
+            }
         }
     }
 

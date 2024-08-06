@@ -5,7 +5,7 @@ struct MainContentView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var tasks: [XPTask] = PersistenceManager.shared.loadTasks()
     @State private var accumulatedXP: Int = PersistenceManager.shared.loadAccumulatedXP()
-    @State private var level: Int = PersistenceManager.shared.loadLevel()
+    @State private var level: Int = max(1, PersistenceManager.shared.loadLevel())
     @State private var maxXP: Int = 100
     @StateObject private var persistenceManager = PersistenceManager.shared
 
@@ -33,7 +33,7 @@ struct MainContentView: View {
                     )
                 }
                 Spacer()
-                Spacer().frame(width: 0) // This maintains the spacing where the Sign Out button was
+                Spacer().frame(width: 0)
             }
             .padding(.top, 50)
             .padding(.horizontal)
@@ -43,6 +43,7 @@ struct MainContentView: View {
                     .padding(.top, 20)
 
                 TaskListView(tasks: $tasks, onTasksChange: saveTasks)
+                    .padding(.top, 10)
 
                 if !showAddTaskForm && !showAddRewardForm {
                     Button(action: {
@@ -86,8 +87,8 @@ struct MainContentView: View {
                 if showAddTaskForm {
                     VStack(spacing: 20) {
                         AddTaskView(viewModel: AddTaskViewModel(
-                            tasks: tasks,
-                            showAddTaskForm: showAddTaskForm,
+                            tasks: $tasks,
+                            showAddTaskForm: $showAddTaskForm,
                             onTasksChange: saveTasks
                         ))
                     }
@@ -98,7 +99,8 @@ struct MainContentView: View {
                     VStack(spacing: 20) {
                         RewardInputView(viewModel: RewardInputViewModel(
                             reward: currentReward,
-                            isPresented: showAddRewardForm,
+                            isPresented: $showAddRewardForm,
+                            showOptions: $showOptions,
                             level: level,
                             persistenceManager: persistenceManager
                         ))
@@ -113,11 +115,10 @@ struct MainContentView: View {
         }
         .navigationTitle("")
         .navigationBarHidden(true)
-        .edgesIgnoringSafeArea(.top)
     }
 
     private var currentReward: String {
-        if level <= persistenceManager.levelRewards.count {
+        if level - 1 < persistenceManager.levelRewards.count {
             return persistenceManager.levelRewards[level - 1]
         } else {
             return ""
