@@ -16,7 +16,7 @@ struct MainContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                NavigationLink(destination: ProfileView(viewModel: ProfileViewModel(tasks: tasks, persistenceManager: persistenceManager))) {
+                NavigationLink(destination: ProfileView(viewModel: ProfileViewModel(tasks: tasks, persistenceManager: persistenceManager, authViewModel: authViewModel))) {
                     HStack {
                         Image(systemName: "person.circle")
                             .imageScale(.large)
