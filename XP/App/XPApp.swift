@@ -1,32 +1,18 @@
-//
-//  XPApp.swift
-//  XP
-//
-//  Created by Jonathan Kerth on 7/23/24.
-//
-
 import SwiftUI
-import SwiftData
+import Firebase
 
 @main
 struct XPApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    @StateObject private var authViewModel = AuthViewModel()
 
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    init() {
+        FirebaseApp.configure()
+    }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(authViewModel)
         }
-        .modelContainer(sharedModelContainer)
     }
 }

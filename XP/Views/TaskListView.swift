@@ -3,14 +3,16 @@ import SwiftUI
 struct TaskListView: View {
     @Binding var tasks: [XPTask]
     var onTasksChange: () -> Void
+    @EnvironmentObject var authViewModel: AuthViewModel
 
     var body: some View {
         ZStack {
-            Color(UIColor.systemGray6) // Grey background behind the tasks
+            Color(UIColor.systemGray6)
                 .edgesIgnoringSafeArea(.all)
             List {
-                ForEach(Array(tasks.enumerated()), id: \.element.id) { index, task in
-                    VStack(alignment: .leading, spacing: 10) { // Added spacing between tasks
+                ForEach(tasks.indices, id: \.self) { index in
+                    let task = tasks[index]
+                    VStack(alignment: .leading, spacing: 10) {
                         HStack {
                             Text(task.name)
                             Spacer()
@@ -19,16 +21,19 @@ struct TaskListView: View {
                                 tasks[index].completed.toggle()
                                 tasks[index].lastCompleted = tasks[index].completed ? Date() : nil
                                 onTasksChange()
+                                if let userID = authViewModel.currentUser?.uid {
+                                    PersistenceManager.shared.updateTask(userID: userID, task: tasks[index])
+                                }
                             }) {
                                 Image(systemName: tasks[index].completed ? "checkmark.square" : "square")
                             }
                         }
                     }
                     .padding()
-                    .background(Color.white) // White background for each task
-                    .cornerRadius(20) // Rounded the corners more
-                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2) // Added shadow for better visual separation
-                    .listRowSeparator(.hidden) // Remove the separator line between tasks
+                    .background(Color.white)
+                    .cornerRadius(20)
+                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                    .listRowSeparator(.hidden)
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             deleteTask(at: IndexSet(integer: index))
@@ -37,13 +42,21 @@ struct TaskListView: View {
                         }
                     }
                 }
-                .onMove(perform: moveTask) // Allow tasks to be moved
+                .onMove(perform: moveTask)
             }
-            .listStyle(PlainListStyle()) // Ensure the list has no additional styling
+            .listStyle(PlainListStyle())
+            .onAppear {
+                print("Task list is now visible with \(tasks.count) tasks.")
+            }
         }
     }
 
     func deleteTask(at offsets: IndexSet) {
+        offsets.forEach { index in
+            if let userID = authViewModel.currentUser?.uid {
+                PersistenceManager.shared.deleteTask(userID: userID, taskID: tasks[index].id)
+            }
+        }
         tasks.remove(atOffsets: offsets)
         onTasksChange()
     }

@@ -1,11 +1,19 @@
 import SwiftUI
+import FirebaseAuth
 
 struct ProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         VStack {
+            if let user = Auth.auth().currentUser {
+                Text("Hello, \(user.email ?? "User")")
+                    .font(.headline)
+                    .padding()
+            }
             List {
                 Section(header: Text("Level Rewards")) {
                     ForEach(0..<66, id: \.self) { index in
@@ -50,9 +58,15 @@ struct ProfileView: View {
             }
             .listStyle(GroupedListStyle())
             .navigationBarTitle("Profile", displayMode: .inline)
-            .navigationBarItems(leading: Button("Home") {
-                presentationMode.wrappedValue.dismiss()
-            })
+            .navigationBarItems(
+                leading: Button("Home") {
+                    presentationMode.wrappedValue.dismiss()
+                },
+                trailing: Button("Sign Out") {
+                    authViewModel.signOut()
+                    dismiss()
+                }
+            )
         }
     }
 }
