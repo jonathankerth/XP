@@ -7,6 +7,7 @@ struct MainContentView: View {
     @State private var accumulatedXP: Int = 0
     @State private var level: Int = 1
     @State private var maxXP: Int = 100
+    @State private var levelRewards: [String] = []
     @StateObject private var persistenceManager = PersistenceManager.shared
 
     @State private var showAddTaskForm = false
@@ -116,6 +117,7 @@ struct MainContentView: View {
                 persistenceManager.syncUserData(userID: userID) { tasks in
                     self.tasks = tasks
                     calculateAccumulatedXP()
+                    fetchLevelRewards(userID: userID)
                 }
             }
             endOfDayResetIfNeeded()
@@ -130,8 +132,8 @@ struct MainContentView: View {
     }
 
     private var currentReward: String {
-        if level - 1 < persistenceManager.levelRewards.count {
-            return persistenceManager.levelRewards[level - 1]
+        if level - 1 < levelRewards.count {
+            return levelRewards[level - 1]
         } else {
             return ""
         }
@@ -183,6 +185,18 @@ struct MainContentView: View {
     private func updateXPAndLevelInFirestore() {
         if let userID = authViewModel.currentUser?.uid {
             persistenceManager.saveUserDataToFirestore(userID: userID)
+        }
+    }
+
+    private func fetchLevelRewards(userID: String) {
+        FirestoreManager.shared.fetchLevelRewards(userID: userID) { rewards, error in
+            if let rewards = rewards {
+                DispatchQueue.main.async {
+                    self.levelRewards = rewards
+                }
+            } else if let error = error {
+                print("Error fetching level rewards from Firebase: \(error)")
+            }
         }
     }
 }
