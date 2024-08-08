@@ -3,9 +3,9 @@ import FirebaseAuth
 
 struct MainContentView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-    @State private var tasks: [XPTask] = PersistenceManager.shared.tasks
-    @State private var accumulatedXP: Int = PersistenceManager.shared.loadAccumulatedXP()
-    @State private var level: Int = max(1, PersistenceManager.shared.loadLevel())
+    @State private var tasks: [XPTask] = []
+    @State private var accumulatedXP: Int = 0
+    @State private var level: Int = 1
     @State private var maxXP: Int = 100
     @StateObject private var persistenceManager = PersistenceManager.shared
 
@@ -33,11 +33,10 @@ struct MainContentView: View {
                     )
                 }
                 Spacer()
-                Spacer().frame(width: 0)
             }
             .padding(.top, 50)
             .padding(.horizontal)
-            
+
             VStack(spacing: 0) {
                 XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: currentReward)
                     .padding(.top, 20)
@@ -113,11 +112,13 @@ struct MainContentView: View {
             }
         }
         .onAppear {
-            endOfDayResetIfNeeded()
-            calculateAccumulatedXP()
             if let userID = authViewModel.currentUser?.uid {
-                persistenceManager.syncUserData(userID: userID)
+                persistenceManager.syncUserData(userID: userID) { tasks in
+                    self.tasks = tasks
+                    calculateAccumulatedXP()
+                }
             }
+            endOfDayResetIfNeeded()
         }
         .onDisappear {
             if let userID = authViewModel.currentUser?.uid {
@@ -138,15 +139,15 @@ struct MainContentView: View {
 
     private func saveTasks() {
         if let userID = authViewModel.currentUser?.uid {
-            PersistenceManager.shared.saveTasks(tasks)
+            persistenceManager.saveTasks(tasks)
             calculateAccumulatedXP()
-            PersistenceManager.shared.saveUserDataToFirestore(userID: userID)
+            persistenceManager.saveUserDataToFirestore(userID: userID)
         }
     }
 
     private func calculateAccumulatedXP() {
         accumulatedXP = tasks.filter { $0.completed }.reduce(0) { $0 + Int($1.xp) }
-        PersistenceManager.shared.saveAccumulatedXP(accumulatedXP)
+        persistenceManager.saveAccumulatedXP(accumulatedXP)
         checkLevelUp()
     }
 
@@ -155,8 +156,8 @@ struct MainContentView: View {
             level += 1
             accumulatedXP -= maxXP
             maxXP = calculateMaxXP(for: level)
-            PersistenceManager.shared.saveLevel(level)
-            PersistenceManager.shared.saveAccumulatedXP(accumulatedXP)
+            persistenceManager.saveLevel(level)
+            persistenceManager.saveAccumulatedXP(accumulatedXP)
         }
         updateXPAndLevelInFirestore()
     }
@@ -170,18 +171,18 @@ struct MainContentView: View {
         let now = Date()
         let startOfDay = calendar.startOfDay(for: now)
 
-        let lastResetDate = PersistenceManager.shared.getLastResetDate() ?? Date.distantPast
+        let lastResetDate = persistenceManager.getLastResetDate() ?? Date.distantPast
         if calendar.isDateInToday(lastResetDate) {
             return
         }
 
-        PersistenceManager.shared.endOfDayReset(tasks: &tasks)
-        PersistenceManager.shared.setLastResetDate(startOfDay)
+        persistenceManager.endOfDayReset(tasks: &tasks)
+        persistenceManager.setLastResetDate(startOfDay)
     }
 
     private func updateXPAndLevelInFirestore() {
         if let userID = authViewModel.currentUser?.uid {
-            PersistenceManager.shared.saveUserDataToFirestore(userID: userID)
+            persistenceManager.saveUserDataToFirestore(userID: userID)
         }
     }
 }
