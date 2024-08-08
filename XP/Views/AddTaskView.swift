@@ -21,6 +21,16 @@ struct AddTaskView: View {
             .background(Color(UIColor.systemGray6))
             .cornerRadius(8)
 
+            Picker("Reset Frequency (days)", selection: $viewModel.resetFrequency) {
+                ForEach(1..<8) { frequency in
+                    Text("\(frequency) day\(frequency > 1 ? "s" : "")").tag(frequency)
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+            .padding()
+            .background(Color(UIColor.systemGray6))
+            .cornerRadius(8)
+
             HStack {
                 Button(action: {
                     viewModel.addTask()

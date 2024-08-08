@@ -92,4 +92,20 @@ class FirestoreManager: ObservableObject {
             completion(error)
         }
     }
+
+    func fetchLevelRewards(userID: String, completion: @escaping ([String]?, Error?) -> Void) {
+        db.collection("users").document(userID).collection("rewards").getDocuments { snapshot, error in
+            if let error = error {
+                completion(nil, error)
+            } else {
+                var rewards: [String] = []
+                for document in snapshot!.documents {
+                    if let reward = document.data()["reward"] as? String {
+                        rewards.append(reward)
+                    }
+                }
+                completion(rewards, nil)
+            }
+        }
+    }
 }
