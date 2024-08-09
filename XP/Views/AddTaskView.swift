@@ -21,6 +21,27 @@ struct AddTaskView: View {
             .background(Color(UIColor.systemGray6))
             .cornerRadius(8)
 
+            Picker("Frequency", selection: $viewModel.taskFrequency) {
+                ForEach(TaskFrequency.allCases) { frequency in
+                    Text(frequency.description).tag(frequency)
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+            .padding()
+            .background(Color(UIColor.systemGray6))
+            .cornerRadius(8)
+            
+            Picker("Category", selection: $viewModel.taskCategory) {
+                ForEach(TaskCategory.allCases) { category in
+                    Text(category.rawValue).tag(category)
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+            .padding()
+            .background(Color(UIColor.systemGray6))
+            .cornerRadius(8)
+
+
             HStack {
                 Button(action: {
                     viewModel.addTask()

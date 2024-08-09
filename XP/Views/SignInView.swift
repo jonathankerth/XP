@@ -1,4 +1,6 @@
 import SwiftUI
+import Firebase
+import AuthenticationServices
 
 struct SignInView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
@@ -6,6 +8,7 @@ struct SignInView: View {
 
     var body: some View {
         VStack {
+            // Email and Password Fields
             TextField("Email", text: $authViewModel.email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
@@ -14,6 +17,7 @@ struct SignInView: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
 
+            // Sign In Button
             Button(action: {
                 authViewModel.signIn { success in
                     if success {
@@ -31,6 +35,29 @@ struct SignInView: View {
             }
             .padding()
 
+            // Sign In with Apple Button
+            SignInWithAppleButton(
+                .signIn,
+                onRequest: { request in
+                    let nonce = authViewModel.randomNonceString()
+                    authViewModel.currentNonce = nonce
+                    request.requestedScopes = [.fullName, .email]
+                    request.nonce = authViewModel.sha256(nonce)
+                },
+                onCompletion: { result in
+                    switch result {
+                    case .success(let authResults):
+                        authViewModel.handleSignInWithApple(result: authResults)
+                    case .failure(let error):
+                        print("Authorization failed: \(error.localizedDescription)")
+                    }
+                }
+            )
+            .signInWithAppleButtonStyle(.black)
+            .frame(height: 45)
+            .padding()
+
+            // Sign Up Navigation
             Button(action: {
                 showSignUp = true
             }) {

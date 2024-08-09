@@ -20,6 +20,7 @@ struct TaskListView: View {
                             Button(action: {
                                 tasks[index].completed.toggle()
                                 tasks[index].lastCompleted = tasks[index].completed ? Date() : nil
+                                updateNextDueDate(for: &tasks[index])
                                 onTasksChange()
                                 if let userID = authViewModel.currentUser?.uid {
                                     PersistenceManager.shared.updateTask(userID: userID, task: tasks[index])
@@ -28,7 +29,21 @@ struct TaskListView: View {
                                 Image(systemName: tasks[index].completed ? "checkmark.square" : "square")
                             }
                         }
+                        // Display the task frequency
+                        Text("Frequency: \(task.frequency.description)")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+
+                        if let nextDueDate = task.nextDueDate {
+                            Text("Next Due: \(formattedDate(nextDueDate))")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
                     }
+                    
+                    Text("Category: \(task.category.rawValue)")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
                     .padding()
                     .background(Color.white)
                     .cornerRadius(20)
@@ -64,5 +79,19 @@ struct TaskListView: View {
     func moveTask(from source: IndexSet, to destination: Int) {
         tasks.move(fromOffsets: source, toOffset: destination)
         onTasksChange()
+    }
+
+    func updateNextDueDate(for task: inout XPTask) {
+        if let lastCompleted = task.lastCompleted {
+            task.nextDueDate = Calendar.current.date(byAdding: .day, value: task.frequency.rawValue, to: lastCompleted)
+        } else {
+            task.nextDueDate = nil
+        }
+    }
+
+    func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        return formatter.string(from: date)
     }
 }

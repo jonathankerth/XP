@@ -83,13 +83,38 @@ class FirestoreManager: ObservableObject {
         }
     }
 
+    func fetchLevelRewards(userID: String, completion: @escaping ([String]?, Error?) -> Void) {
+        db.collection("users").document(userID).collection("rewards").getDocuments { snapshot, error in
+            if let error = error {
+                print("Error fetching level rewards from Firebase: \(error)")
+                completion(nil, error)
+            } else {
+                var rewards: [String] = []
+                for document in snapshot!.documents {
+                    if let reward = document.data()["reward"] as? String {
+                        rewards.append(reward)
+                    }
+                }
+                print("Fetched rewards from Firebase: \(rewards)")
+                completion(rewards, nil)
+            }
+        }
+    }
+
+
     func saveLevelReward(userID: String, level: Int, reward: String, completion: @escaping (Error?) -> Void) {
         let rewardData: [String: Any] = [
             "level": level,
             "reward": reward
         ]
         db.collection("users").document(userID).collection("rewards").document("\(level)").setData(rewardData) { error in
+            if let error = error {
+                print("Error saving level reward to Firebase: \(error)")
+            } else {
+                print("Successfully saved reward \(reward) for level \(level) to Firebase")
+            }
             completion(error)
         }
     }
+
 }

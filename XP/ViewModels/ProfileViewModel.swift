@@ -2,7 +2,7 @@ import Foundation
 
 class ProfileViewModel: ObservableObject {
     @Published var tasks: [XPTask]
-    @Published var levelRewards: [String]
+    @Published var levelRewards: [String] = []
     @Published var editIndex: Int?
 
     private var persistenceManager: PersistenceManager
@@ -12,7 +12,22 @@ class ProfileViewModel: ObservableObject {
         self.tasks = tasks
         self.persistenceManager = persistenceManager
         self.authViewModel = authViewModel
-        self.levelRewards = persistenceManager.levelRewards
+        fetchLevelRewards()
+    }
+
+    private func fetchLevelRewards() {
+        if let userID = authViewModel.currentUser?.uid {
+            FirestoreManager.shared.fetchLevelRewards(userID: userID) { rewards, error in
+                if let rewards = rewards {
+                    DispatchQueue.main.async {
+                        self.levelRewards = rewards
+                        print("Fetched rewards: \(rewards)") // Debugging
+                    }
+                } else if let error = error {
+                    print("Error fetching level rewards from Firebase: \(error)")
+                }
+            }
+        }
     }
 
     func editReward(at index: Int) {
@@ -35,10 +50,16 @@ class ProfileViewModel: ObservableObject {
     }
 
     private func saveReward(index: Int) {
+        guard index >= 0 && index < levelRewards.count else {
+            print("Index out of range: \(index). Array size is \(levelRewards.count).")
+            return
+        }
+
         if let userID = authViewModel.currentUser?.uid {
             let reward = levelRewards[index]
             persistenceManager.saveLevelReward(userID: userID, level: index + 1, reward: reward)
         }
         persistenceManager.saveLevelRewards(levelRewards)
     }
+
 }

@@ -134,6 +134,15 @@ class PersistenceManager: ObservableObject {
                 print("Error fetching tasks from Firebase: \(error)")
             }
         }
+
+        // Fetch level rewards from Firestore
+        FirestoreManager.shared.fetchLevelRewards(userID: userID) { rewards, error in
+            if let rewards = rewards {
+                self.saveLevelRewards(rewards)
+            } else if let error = error {
+                print("Error fetching level rewards from Firebase: \(error)")
+            }
+        }
     }
 
     func saveUserDataToFirestore(userID: String) {
