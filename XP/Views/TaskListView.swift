@@ -15,8 +15,11 @@ struct TaskListView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
                             Text(task.name)
+                                .font(.headline)
                             Spacer()
                             Text("\(task.xp) XP")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
                             Button(action: {
                                 tasks[index].completed.toggle()
                                 tasks[index].lastCompleted = tasks[index].completed ? Date() : nil
@@ -26,10 +29,15 @@ struct TaskListView: View {
                                     PersistenceManager.shared.updateTask(userID: userID, task: tasks[index])
                                 }
                             }) {
-                                Image(systemName: tasks[index].completed ? "checkmark.square" : "square")
+                                Image(systemName: tasks[index].completed ? "checkmark.square.fill" : "square")
+                                    .foregroundColor(tasks[index].completed ? .green : .gray)
                             }
                         }
-                        // Display the task frequency
+                        
+                        Text("Category: \(task.category.rawValue)")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+
                         Text("Frequency: \(task.frequency.description)")
                             .font(.subheadline)
                             .foregroundColor(.gray)
@@ -40,10 +48,6 @@ struct TaskListView: View {
                                 .foregroundColor(.gray)
                         }
                     }
-                    
-                    Text("Category: \(task.category.rawValue)")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
                     .padding()
                     .background(Color.white)
                     .cornerRadius(20)

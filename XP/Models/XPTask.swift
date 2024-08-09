@@ -15,7 +15,6 @@ enum TaskCategory: String, Codable, CaseIterable, Identifiable {
     case passionProject = "Passion Project"
     case discipline = "Discipline"
     case mindfulness = "Mindfulness"
-
     var id: String { self.rawValue }
 }
 
@@ -53,4 +52,6 @@ struct XPTask: Identifiable, Codable {
     var nextDueDate: Date?
     var frequency: TaskFrequency
     var category: TaskCategory 
+    var lastReset: Date? 
+    var resetFrequency: Int
 }
