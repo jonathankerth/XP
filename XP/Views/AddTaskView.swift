@@ -41,7 +41,6 @@ struct AddTaskView: View {
             .background(Color(UIColor.systemGray6))
             .cornerRadius(8)
 
-
             HStack {
                 Button(action: {
                     viewModel.addTask()
