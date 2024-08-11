@@ -1,6 +1,46 @@
 import SwiftUI
 import Firebase
+import GoogleSignIn
 import AuthenticationServices
+
+// Wrapper for GIDSignInButton to be used in SwiftUI
+struct GoogleSignInButtonWrapper: UIViewRepresentable {
+    @EnvironmentObject var authViewModel: AuthViewModel
+
+    func makeUIView(context: Context) -> GIDSignInButton {
+        let button = GIDSignInButton()
+        button.style = .wide
+        button.addTarget(context.coordinator, action: #selector(Coordinator.signInTapped), for: .touchUpInside)
+        return button
+    }
+
+    func updateUIView(_ uiView: GIDSignInButton, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject {
+        var parent: GoogleSignInButtonWrapper
+
+        init(_ parent: GoogleSignInButtonWrapper) {
+            self.parent = parent
+        }
+
+        @objc func signInTapped() {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootViewController = windowScene.windows.first?.rootViewController {
+                parent.authViewModel.signInWithGoogle(presentingViewController: rootViewController) { success in
+                    if success {
+                        // Handle successful Google sign-in
+                    } else {
+                        // Handle Google sign-in failure
+                    }
+                }
+            }
+        }
+    }
+}
 
 struct SignInView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
@@ -12,6 +52,8 @@ struct SignInView: View {
             TextField("Email", text: $authViewModel.email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
+                .keyboardType(.emailAddress)
+                .autocapitalization(.none)
 
             SecureField("Password", text: $authViewModel.password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -28,12 +70,18 @@ struct SignInView: View {
                 }
             }) {
                 Text("Sign In")
+                    .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
             .padding()
+
+            // Sign In with Google Button
+            GoogleSignInButtonWrapper()
+                .frame(height: 50)
+                .padding()
 
             // Sign In with Apple Button
             SignInWithAppleButton(

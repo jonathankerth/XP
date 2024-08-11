@@ -64,7 +64,7 @@ class FirestoreManager: ObservableObject {
             "level": level,
             "rewards": rewards
         ]
-        db.collection("users").document(userID).setData(userData) { error in
+        db.collection("users").document(userID).setData(userData, merge: true) { error in
             completion(error)
         }
     }
@@ -101,7 +101,6 @@ class FirestoreManager: ObservableObject {
         }
     }
 
-
     func saveLevelReward(userID: String, level: Int, reward: String, completion: @escaping (Error?) -> Void) {
         let rewardData: [String: Any] = [
             "level": level,
@@ -117,4 +116,26 @@ class FirestoreManager: ObservableObject {
         }
     }
 
+    func saveUserProfile(userID: String, firstName: String, lastName: String, completion: @escaping (Error?) -> Void) {
+        let userData: [String: Any] = [
+            "firstName": firstName,
+            "lastName": lastName
+        ]
+        db.collection("users").document(userID).setData(userData, merge: true) { error in
+            completion(error)
+        }
+    }
+
+    func fetchUserProfile(userID: String, completion: @escaping (String?, String?, Error?) -> Void) {
+        db.collection("users").document(userID).getDocument { document, error in
+            if let document = document, document.exists {
+                let data = document.data()
+                let firstName = data?["firstName"] as? String
+                let lastName = data?["lastName"] as? String
+                completion(firstName, lastName, nil)
+            } else {
+                completion(nil, nil, error)
+            }
+        }
+    }
 }
