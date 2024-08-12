@@ -83,28 +83,22 @@ class PersistenceManager: ObservableObject {
     }
 
     func endOfDayReset(tasks: inout [XPTask]) {
-        // Accumulate XP and reset tasks
+        let now = Date().timeIntervalSince1970
         let completedXP = tasks.filter { $0.completed }.reduce(0) { $0 + Int($1.xp) }
         var totalXP = loadAccumulatedXP()
         totalXP += completedXP
         saveAccumulatedXP(totalXP)
 
-        let now = Date()
         tasks = tasks.map {
             var task = $0
-            if let lastReset = task.lastReset {
-                let daysSinceLastReset = Calendar.current.dateComponents([.day], from: lastReset, to: now).day ?? 0
-                if daysSinceLastReset >= task.resetFrequency {
-                    task.completed = false
-                    task.lastReset = now
-                }
-            } else {
-                task.lastReset = now
+            if let nextDueDate = task.nextDueDate?.timeIntervalSince1970, now >= nextDueDate {
+                task.completed = false
+                task.lastReset = Date()
+                task.nextDueDate = Calendar.current.date(byAdding: .day, value: task.resetFrequency, to: Date())
             }
             return task
         }
 
-        // Save updated tasks
         saveTasks(tasks)
     }
 
@@ -114,6 +108,13 @@ class PersistenceManager: ObservableObject {
 
     func setLastResetDate(_ date: Date) {
         defaults.set(date, forKey: "lastResetDate")
+    }
+
+    // Reset tasks if needed
+    func resetTasksIfNeeded() {
+        var tasks = self.tasks
+        endOfDayReset(tasks: &tasks)
+        self.tasks = tasks
     }
 
     // Firestore sync functions
@@ -138,7 +139,6 @@ class PersistenceManager: ObservableObject {
             }
         }
 
-        // Fetch level rewards from Firestore
         FirestoreManager.shared.fetchLevelRewards(userID: userID) { rewards, error in
             if let rewards = rewards {
                 self.saveLevelRewards(rewards)

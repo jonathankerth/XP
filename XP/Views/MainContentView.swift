@@ -120,7 +120,7 @@ struct MainContentView: View {
                     fetchLevelRewards(userID: userID)
                 }
             }
-            endOfDayResetIfNeeded()
+            startResetTimer() // Start the reset timer when the view appears
         }
         .onDisappear {
             if let userID = authViewModel.currentUser?.uid {
@@ -168,20 +168,6 @@ struct MainContentView: View {
         return 100 + (level - 1) * 50
     }
 
-    private func endOfDayResetIfNeeded() {
-        let calendar = Calendar.current
-        let now = Date()
-        let startOfDay = calendar.startOfDay(for: now)
-
-        let lastResetDate = persistenceManager.getLastResetDate() ?? Date.distantPast
-        if calendar.isDateInToday(lastResetDate) {
-            return
-        }
-
-        persistenceManager.endOfDayReset(tasks: &tasks)
-        persistenceManager.setLastResetDate(startOfDay)
-    }
-
     private func updateXPAndLevelInFirestore() {
         if let userID = authViewModel.currentUser?.uid {
             persistenceManager.saveUserDataToFirestore(userID: userID)
@@ -197,6 +183,14 @@ struct MainContentView: View {
             } else if let error = error {
                 print("Error fetching level rewards from Firebase: \(error)")
             }
+        }
+    }
+
+    // Start a timer that checks every few minutes if tasks need to be reset
+    private func startResetTimer() {
+        Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { _ in
+            self.persistenceManager.resetTasksIfNeeded()
+            self.calculateAccumulatedXP() // Recalculate XP after resetting tasks
         }
     }
 }
