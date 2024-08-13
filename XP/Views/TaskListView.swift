@@ -6,67 +6,58 @@ struct TaskListView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
 
     var body: some View {
-        ZStack {
-            Color(UIColor.systemGray6)
-                .edgesIgnoringSafeArea(.all)
-            List {
-                ForEach(tasks.indices, id: \.self) { index in
-                    let task = tasks[index]
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text(task.name)
-                                .font(.headline)
-                            Spacer()
-                            Text("\(task.xp) XP")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                            Button(action: {
-                                tasks[index].completed.toggle()
-                                tasks[index].lastCompleted = tasks[index].completed ? Date() : nil
-                                updateNextDueDate(for: &tasks[index])
-                                onTasksChange()
-                                if let userID = authViewModel.currentUser?.uid {
-                                    PersistenceManager.shared.updateTask(userID: userID, task: tasks[index])
-                                }
-                            }) {
-                                Image(systemName: tasks[index].completed ? "checkmark.square.fill" : "square")
-                                    .foregroundColor(tasks[index].completed ? .green : .gray)
+        List {
+            ForEach(tasks.indices, id: \.self) { index in
+                let task = tasks[index]
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text(task.name)
+                            .font(.headline)
+                            .foregroundColor(.black)
+                        Spacer()
+                        Text("\(task.xp) XP")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                        Button(action: {
+                            tasks[index].completed.toggle()
+                            tasks[index].lastCompleted = tasks[index].completed ? Date() : nil
+                            updateNextDueDate(for: &tasks[index])
+                            onTasksChange()
+                            if let userID = authViewModel.currentUser?.uid {
+                                PersistenceManager.shared.updateTask(userID: userID, task: tasks[index])
                             }
-                        }
-                        
-                        Text("Category: \(task.category.rawValue)")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-
-                        Text("Frequency: \(task.frequency.description)")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-
-                        if let nextDueDate = task.nextDueDate {
-                            Text("Next Due: \(formattedDate(nextDueDate))")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                        }) {
+                            Image(systemName: tasks[index].completed ? "checkmark.square.fill" : "square")
+                                .foregroundColor(tasks[index].completed ? .green : .gray)
                         }
                     }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(20)
-                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                    .listRowSeparator(.hidden)
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            deleteTask(at: IndexSet(integer: index))
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
+                    
+                    Text("Category: \(task.category.rawValue)")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+
+                    Text("Frequency: \(task.frequency.description)")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+
+                    if let nextDueDate = task.nextDueDate {
+                        Text("Next Due: \(formattedDate(nextDueDate))")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
                     }
                 }
-                .onMove(perform: moveTask)
+                .padding()
+                .background(Color.white) // Keep task backgrounds white
+                .cornerRadius(20)
+                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                .listRowBackground(Color.clear) // Set list row background to clear
             }
-            .listStyle(PlainListStyle())
-            .onAppear {
-                print("Task list is now visible with \(tasks.count) tasks.")
-            }
+            .onMove(perform: moveTask)
+        }
+        .listStyle(PlainListStyle())
+        .background(Color.clear) // Ensure the list background is clear
+        .onAppear {
+            print("Task list is now visible with \(tasks.count) tasks.")
         }
     }
 
@@ -88,6 +79,7 @@ struct TaskListView: View {
     func updateNextDueDate(for task: inout XPTask) {
         if let lastCompleted = task.lastCompleted {
             task.nextDueDate = Calendar.current.date(byAdding: .day, value: task.frequency.rawValue, to: lastCompleted)
+            task.lastReset = Date()
         } else {
             task.nextDueDate = nil
         }

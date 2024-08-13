@@ -30,8 +30,8 @@ class AddTaskViewModel: ObservableObject {
                 nextDueDate: nextDueDate,
                 frequency: taskFrequency,
                 category: taskCategory,
-                lastReset: nil, // Optional, can be set to nil or a date if required
-                resetFrequency: taskFrequency.rawValue // Set resetFrequency based on frequency
+                lastReset: Date(), // Set current date as the last reset time
+                resetFrequency: taskFrequency.rawValue
             )
             tasks.wrappedValue.append(newTask)
             if let userID = authViewModel.currentUser?.uid {

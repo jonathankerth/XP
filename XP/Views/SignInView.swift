@@ -3,18 +3,33 @@ import Firebase
 import GoogleSignIn
 import AuthenticationServices
 
-// Wrapper for GIDSignInButton to be used in SwiftUI
 struct GoogleSignInButtonWrapper: UIViewRepresentable {
     @EnvironmentObject var authViewModel: AuthViewModel
 
-    func makeUIView(context: Context) -> GIDSignInButton {
+    func makeUIView(context: Context) -> UIView {
+        let containerView = UIView()
+        
         let button = GIDSignInButton()
         button.style = .wide
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        containerView.addSubview(button)
+        
+        NSLayoutConstraint.activate([
+            button.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            button.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            button.topAnchor.constraint(equalTo: containerView.topAnchor),
+            button.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+            containerView.heightAnchor.constraint(equalToConstant: 50),
+            containerView.widthAnchor.constraint(equalToConstant: 312)
+        ])
+        
         button.addTarget(context.coordinator, action: #selector(Coordinator.signInTapped), for: .touchUpInside)
-        return button
+        
+        return containerView
     }
 
-    func updateUIView(_ uiView: GIDSignInButton, context: Context) {}
+    func updateUIView(_ uiView: UIView, context: Context) {}
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -47,76 +62,79 @@ struct SignInView: View {
     @State private var showSignUp = false
 
     var body: some View {
-        VStack {
-            // Email and Password Fields
-            TextField("Email", text: $authViewModel.email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-                .keyboardType(.emailAddress)
-                .autocapitalization(.none)
+        ZStack {
+            BackgroundView()
+            
+            VStack(spacing: 16) {
+                Image("XP Header Logo")
+                    .resizable()
+                    .scaledToFit()
+                    .scaleEffect(1.5)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 50)
 
-            SecureField("Password", text: $authViewModel.password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+                TextField("Email", text: $authViewModel.email)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
 
-            // Sign In Button
-            Button(action: {
-                authViewModel.signIn { success in
-                    if success {
-                        // Handle successful sign-in
-                    } else {
-                        // Handle sign-in failure
+                SecureField("Password", text: $authViewModel.password)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                Button(action: {
+                    authViewModel.signIn { success in
+                        if success {
+                            // Handle successful sign-in
+                        } else {
+                            // Handle sign-in failure
+                        }
                     }
+                }) {
+                    Text("Sign In")
+                        .frame(width: 312, height: 50)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(25)
                 }
-            }) {
-                Text("Sign In")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            .padding()
-
-            // Sign In with Google Button
-            GoogleSignInButtonWrapper()
-                .frame(height: 50)
                 .padding()
 
-            // Sign In with Apple Button
-            SignInWithAppleButton(
-                .signIn,
-                onRequest: { request in
-                    let nonce = authViewModel.randomNonceString()
-                    authViewModel.currentNonce = nonce
-                    request.requestedScopes = [.fullName, .email]
-                    request.nonce = authViewModel.sha256(nonce)
-                },
-                onCompletion: { result in
-                    switch result {
-                    case .success(let authResults):
-                        authViewModel.handleSignInWithApple(result: authResults)
-                    case .failure(let error):
-                        print("Authorization failed: \(error.localizedDescription)")
+                GoogleSignInButtonWrapper()
+                    .frame(width: 312, height: 50)
+                    .cornerRadius(25)
+                
+                SignInWithAppleButton(
+                    .signIn,
+                    onRequest: { request in
+                        let nonce = authViewModel.randomNonceString()
+                        authViewModel.currentNonce = nonce
+                        request.requestedScopes = [.fullName, .email]
+                        request.nonce = authViewModel.sha256(nonce)
+                    },
+                    onCompletion: { result in
+                        switch result {
+                        case .success(let authResults):
+                            authViewModel.handleSignInWithApple(result: authResults)
+                        case .failure(let error):
+                            print("Authorization failed: \(error.localizedDescription)")
+                        }
                     }
-                }
-            )
-            .signInWithAppleButtonStyle(.black)
-            .frame(height: 45)
-            .padding()
+                )
+                .signInWithAppleButtonStyle(.whiteOutline)
+                .frame(width: 312, height: 50)
+                .cornerRadius(25)
 
-            // Sign Up Navigation
-            Button(action: {
-                showSignUp = true
-            }) {
-                Text("Don't have an account? Sign up here.")
-                    .foregroundColor(.blue)
+                Button(action: {
+                    showSignUp = true
+                }) {
+                    Text("Don't have an account? Sign up")
+                        .foregroundColor(.blue)
+                }
+                .padding()
+                .navigationDestination(isPresented: $showSignUp) {
+                    SignUpView()
+                }
             }
             .padding()
-            .navigationDestination(isPresented: $showSignUp) {
-                SignUpView()
-            }
         }
-        .padding()
     }
 }

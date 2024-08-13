@@ -6,10 +6,12 @@ struct OptionSelectionView: View {
     @Binding var showAddRewardForm: Bool
 
     var body: some View {
-        VStack {
+        VStack(spacing: 16) {
             Text("What would you like to add?")
                 .font(.headline)
-            HStack {
+                .foregroundColor(.black)
+            
+            VStack(spacing: 10) {
                 Button(action: {
                     showAddTaskForm = true
                     showAddRewardForm = false
@@ -17,10 +19,16 @@ struct OptionSelectionView: View {
                 }) {
                     Text("Add Task")
                         .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.white)
+                        .foregroundColor(.black)
+                        .cornerRadius(20)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.blue, lineWidth: 1)
+                        )
                 }
+                
                 Button(action: {
                     showAddRewardForm = true
                     showAddTaskForm = false
@@ -28,16 +36,21 @@ struct OptionSelectionView: View {
                 }) {
                     Text("Add Reward")
                         .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.white)
+                        .foregroundColor(.black)
+                        .cornerRadius(20)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.green, lineWidth: 1)
+                        )
                 }
             }
-            .padding()
         }
         .padding()
         .background(Color.white)
-        .cornerRadius(8)
+        .cornerRadius(20)
         .shadow(radius: 10)
+        .padding()
     }
 }

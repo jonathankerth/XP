@@ -52,8 +52,8 @@ struct AddTaskView: View {
                             .font(.headline)
                     }
                     .padding()
-                    .background(Color.black)
-                    .foregroundColor(.white)
+                    .background(Color.white)
+                    .foregroundColor(.black)
                     .cornerRadius(8)
                 }
 

@@ -1,5 +1,4 @@
 import SwiftUI
-import FirebaseAuth
 
 struct MainContentView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
@@ -15,100 +14,84 @@ struct MainContentView: View {
     @State private var showOptions = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                NavigationLink(destination: ProfileView(viewModel: ProfileViewModel(tasks: tasks, persistenceManager: persistenceManager, authViewModel: authViewModel))) {
-                    HStack {
-                        Image(systemName: "person.circle")
-                            .imageScale(.large)
-                        Text("Profile")
-                            .font(.headline)
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .foregroundColor(.black)
-                    .cornerRadius(20)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.gray, lineWidth: 1)
-                    )
-                }
-                Spacer()
-            }
-            .padding(.top, 50)
-            .padding(.horizontal)
-
+        ZStack {
+            BackgroundView() // Background view behind everything
+            
             VStack(spacing: 0) {
-                XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: currentReward)
-                    .padding(.top, 20)
-
-                TaskListView(tasks: $tasks, onTasksChange: saveTasks)
-                    .padding(.top, 10)
-                    .environmentObject(authViewModel)
-
-                if !showAddTaskForm && !showAddRewardForm {
-                    Button(action: {
-                        showOptions.toggle()
-                    }) {
-                        Text(showOptions ? "-" : "+")
-                            .font(.system(size: 40, weight: .bold))
-                            .foregroundColor(.black)
-                    }
-                    .padding()
-                }
-
-                if showOptions {
-                    VStack {
-                        Button(action: {
-                            showAddTaskForm = true
-                            showAddRewardForm = false
-                            showOptions = false
-                        }) {
-                            Text("Add Task")
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(20)
+                HStack {
+                    NavigationLink(destination: ProfileView(viewModel: ProfileViewModel(tasks: tasks, persistenceManager: persistenceManager, authViewModel: authViewModel))) {
+                        HStack {
+                            Image(systemName: "person.circle")
+                                .imageScale(.large)
+                            Text("Profile")
+                                .font(.headline)
                         }
-                        .padding(.bottom, 5)
+                        .padding()
+                        .background(Color.white)
+                        .foregroundColor(.black)
+                        .cornerRadius(20)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.gray, lineWidth: 1)
+                        )
+                    }
+                    Spacer()
+                }
+                .padding(.top, 50)
+                .padding(.horizontal)
+
+                VStack(spacing: 0) {
+                    XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: currentReward)
+                        .padding(.top, 20)
+
+                    TaskListView(tasks: $tasks, onTasksChange: saveTasks)
+                        .padding(.top, 0) // Reduced space between TaskListView and XPBar
+                        .environmentObject(authViewModel)
+
+                    Spacer()
+
+                    if !showAddTaskForm && !showAddRewardForm {
                         Button(action: {
-                            showAddRewardForm = true
-                            showAddTaskForm = false
-                            showOptions = false
+                            showOptions.toggle()
                         }) {
-                            Text("Add Reward")
-                                .padding()
-                                .background(Color.green)
+                            Text(showOptions ? "-" : "+")
+                                .font(.system(size: 40, weight: .bold))
                                 .foregroundColor(.white)
-                                .cornerRadius(20)
                         }
+                        .padding(.top, 10) // Reduced space above the "+"
+                        .padding(.bottom, showOptions ? 10 : 40) // Adjusted space below the button
                     }
-                }
 
-                if showAddTaskForm {
-                    VStack(spacing: 20) {
-                        AddTaskView(viewModel: AddTaskViewModel(
-                            tasks: $tasks,
-                            showAddTaskForm: $showAddTaskForm,
-                            onTasksChange: saveTasks,
-                            authViewModel: authViewModel
-                        ))
+                    if showOptions {
+                        OptionSelectionView(isPresented: $showOptions, showAddTaskForm: $showAddTaskForm, showAddRewardForm: $showAddRewardForm)
+                            .padding(.bottom, 20) // Ensure there is space below the OptionSelectionView
                     }
-                    .padding()
-                }
 
-                if showAddRewardForm {
-                    VStack(spacing: 20) {
-                        RewardInputView(viewModel: RewardInputViewModel(
-                            reward: currentReward,
-                            isPresented: $showAddRewardForm,
-                            showOptions: $showOptions,
-                            level: level,
-                            persistenceManager: persistenceManager,
-                            authViewModel: authViewModel
-                        ))
+                    if showAddTaskForm {
+                        VStack(spacing: 20) {
+                            AddTaskView(viewModel: AddTaskViewModel(
+                                tasks: $tasks,
+                                showAddTaskForm: $showAddTaskForm,
+                                onTasksChange: saveTasks,
+                                authViewModel: authViewModel
+                            ))
+                        }
+                        .padding()
                     }
-                    .padding()
+
+                    if showAddRewardForm {
+                        VStack(spacing: 20) {
+                            RewardInputView(viewModel: RewardInputViewModel(
+                                reward: currentReward,
+                                isPresented: $showAddRewardForm,
+                                showOptions: $showOptions,
+                                level: level,
+                                persistenceManager: persistenceManager,
+                                authViewModel: authViewModel
+                            ))
+                        }
+                        .padding()
+                    }
                 }
             }
         }
