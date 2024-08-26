@@ -87,11 +87,15 @@ struct MainContentView: View {
                                 showOptions: $showOptions,
                                 level: level,
                                 persistenceManager: persistenceManager,
-                                authViewModel: authViewModel
+                                authViewModel: authViewModel,
+                                onRewardSet: { newReward in
+                                    self.levelRewards[level - 1] = newReward
+                                }
                             ))
                         }
                         .padding()
                     }
+
                 }
             }
         }
@@ -121,6 +125,7 @@ struct MainContentView: View {
             return ""
         }
     }
+
 
     private func saveTasks() {
         if let userID = authViewModel.currentUser?.uid {

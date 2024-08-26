@@ -31,7 +31,8 @@ class AddTaskViewModel: ObservableObject {
                 frequency: taskFrequency,
                 category: taskCategory,
                 lastReset: Date(), // Set current date as the last reset time
-                resetFrequency: taskFrequency.rawValue
+                resetFrequency: taskFrequency.rawValue,
+                xpAwarded: false
             )
             tasks.wrappedValue.append(newTask)
             if let userID = authViewModel.currentUser?.uid {
@@ -45,6 +46,7 @@ class AddTaskViewModel: ObservableObject {
             showAddTaskForm.wrappedValue = false
         }
     }
+
 
     func cancel() {
         showAddTaskForm.wrappedValue = false

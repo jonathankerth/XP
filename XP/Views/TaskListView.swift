@@ -19,8 +19,14 @@ struct TaskListView: View {
                             .font(.subheadline)
                             .foregroundColor(.gray)
                         Button(action: {
-                            tasks[index].completed.toggle()
-                            tasks[index].lastCompleted = tasks[index].completed ? Date() : nil
+                            if !tasks[index].completed {
+                                tasks[index].completed = true
+                                tasks[index].lastCompleted = Date()
+                                tasks[index].xpAwarded = false // Reset xpAwarded when the task is unchecked
+                            } else {
+                                tasks[index].completed = false
+                                tasks[index].lastCompleted = nil
+                            }
                             updateNextDueDate(for: &tasks[index])
                             onTasksChange()
                             if let userID = authViewModel.currentUser?.uid {
@@ -30,6 +36,7 @@ struct TaskListView: View {
                             Image(systemName: tasks[index].completed ? "checkmark.square.fill" : "square")
                                 .foregroundColor(tasks[index].completed ? .green : .gray)
                         }
+
                     }
                     
                     Text("Category: \(task.category.rawValue)")

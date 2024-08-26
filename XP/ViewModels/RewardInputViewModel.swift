@@ -8,14 +8,16 @@ class RewardInputViewModel: ObservableObject {
     private let level: Int
     private let persistenceManager: PersistenceManager
     var authViewModel: AuthViewModel
+    var onRewardSet: (String) -> Void
 
-    init(reward: String, isPresented: Binding<Bool>, showOptions: Binding<Bool>, level: Int, persistenceManager: PersistenceManager, authViewModel: AuthViewModel) {
+    init(reward: String, isPresented: Binding<Bool>, showOptions: Binding<Bool>, level: Int, persistenceManager: PersistenceManager, authViewModel: AuthViewModel, onRewardSet: @escaping (String) -> Void) {
         self.reward = reward
         self._isPresented = isPresented
         self._showOptions = showOptions
         self.level = level
         self.persistenceManager = persistenceManager
         self.authViewModel = authViewModel
+        self.onRewardSet = onRewardSet
     }
 
     func cancel() {
@@ -32,6 +34,7 @@ class RewardInputViewModel: ObservableObject {
         if let userID = authViewModel.currentUser?.uid {
             persistenceManager.saveLevelReward(userID: userID, level: level, reward: reward)
         }
+        onRewardSet(reward) // Call the closure to update the reward in MainContentView
         isPresented = false
         showOptions = true
     }

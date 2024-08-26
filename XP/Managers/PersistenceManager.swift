@@ -84,21 +84,26 @@ class PersistenceManager: ObservableObject {
 
     func endOfDayReset(tasks: inout [XPTask]) {
         let now = Date().timeIntervalSince1970
-        let completedXP = tasks.filter { $0.completed }.reduce(0) { $0 + Int($1.xp) }
         var totalXP = loadAccumulatedXP()
-        totalXP += completedXP
-        saveAccumulatedXP(totalXP)
 
         tasks = tasks.map {
             var task = $0
+            if task.completed && !task.xpAwarded {
+                totalXP += task.xp
+                task.xpAwarded = true // Mark XP as awarded
+            }
+
             if let nextDueDate = task.nextDueDate?.timeIntervalSince1970, now >= nextDueDate {
                 task.completed = false
                 task.lastReset = Date()
                 task.nextDueDate = Calendar.current.date(byAdding: .day, value: task.resetFrequency, to: Date())
+                task.xpAwarded = false // Reset xpAwarded for the next cycle
             }
+
             return task
         }
 
+        saveAccumulatedXP(totalXP)
         saveTasks(tasks)
     }
 

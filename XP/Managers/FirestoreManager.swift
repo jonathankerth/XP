@@ -9,13 +9,17 @@ class FirestoreManager: ObservableObject {
     func saveTask(userID: String, task: XPTask, completion: @escaping (Error?) -> Void) {
         do {
             let data = try JSONEncoder().encode(task)
-            let json = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
+            var json = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
+            json["xpAwarded"] = task.xpAwarded // Add xpAwarded to the stored data
+
             db.collection("users").document(userID).collection("tasks").document(task.id).setData(json) { error in
                 completion(error)
             }
         } catch let error {
             completion(error)
         }
+    
+
     }
 
     func fetchTasks(userID: String, completion: @escaping ([XPTask]?, Error?) -> Void) {
@@ -39,6 +43,7 @@ class FirestoreManager: ObservableObject {
             }
         }
     }
+
 
     func updateTask(userID: String, task: XPTask, completion: @escaping (Error?) -> Void) {
         do {
