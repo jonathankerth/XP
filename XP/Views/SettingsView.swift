@@ -68,7 +68,7 @@ struct SettingsView: View {
                 HStack {
                     Image(systemName: "chevron.left")
                         .foregroundColor(.white)
-                    Text("Back")
+                    Text("Home")
                         .foregroundColor(.white)
                 }
             }
