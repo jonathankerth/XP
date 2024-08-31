@@ -9,6 +9,12 @@
 /* Begin PBXBuildFile section */
 		9C05371A2C536B180062AEDE /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C0537192C536B180062AEDE /* ProfileView.swift */; };
 		9C05371C2C536DAA0062AEDE /* OptionSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C05371B2C536DAA0062AEDE /* OptionSelectionView.swift */; };
+		9C65C9272C7C1A100059F526 /* TopCategoryCardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C65C9262C7C1A100059F526 /* TopCategoryCardViewModel.swift */; };
+		9C65C9292C7C1A220059F526 /* TopCategoryCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C65C9282C7C1A220059F526 /* TopCategoryCardView.swift */; };
+		9C65C92B2C7C1A300059F526 /* CategoryExperienceCardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C65C92A2C7C1A300059F526 /* CategoryExperienceCardViewModel.swift */; };
+		9C65C92D2C7C1A3F0059F526 /* CategoryExperienceCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C65C92C2C7C1A3F0059F526 /* CategoryExperienceCardView.swift */; };
+		9C65C92F2C7C1A530059F526 /* StreakCardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C65C92E2C7C1A530059F526 /* StreakCardViewModel.swift */; };
+		9C65C9312C7C1A630059F526 /* StreakCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C65C9302C7C1A630059F526 /* StreakCardView.swift */; };
 		9C8718342C6062D2008C5AFA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8718332C6062D2008C5AFA /* AppDelegate.swift */; };
 		9C8718382C606494008C5AFA /* FirestoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8718372C606494008C5AFA /* FirestoreManager.swift */; };
 		9C87183D2C616D30008C5AFA /* SignInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C87183C2C616D30008C5AFA /* SignInViewModel.swift */; };
@@ -81,6 +87,12 @@
 /* Begin PBXFileReference section */
 		9C0537192C536B180062AEDE /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		9C05371B2C536DAA0062AEDE /* OptionSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionSelectionView.swift; sourceTree = "<group>"; };
+		9C65C9262C7C1A100059F526 /* TopCategoryCardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCategoryCardViewModel.swift; sourceTree = "<group>"; };
+		9C65C9282C7C1A220059F526 /* TopCategoryCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCategoryCardView.swift; sourceTree = "<group>"; };
+		9C65C92A2C7C1A300059F526 /* CategoryExperienceCardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryExperienceCardViewModel.swift; sourceTree = "<group>"; };
+		9C65C92C2C7C1A3F0059F526 /* CategoryExperienceCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryExperienceCardView.swift; sourceTree = "<group>"; };
+		9C65C92E2C7C1A530059F526 /* StreakCardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCardViewModel.swift; sourceTree = "<group>"; };
+		9C65C9302C7C1A630059F526 /* StreakCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCardView.swift; sourceTree = "<group>"; };
 		9C8718332C6062D2008C5AFA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9C8718372C606494008C5AFA /* FirestoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreManager.swift; sourceTree = "<group>"; };
 		9C87183C2C616D30008C5AFA /* SignInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInViewModel.swift; sourceTree = "<group>"; };
@@ -184,6 +196,9 @@
 				9C8718462C6171DB008C5AFA /* MainContentView.swift */,
 				9CE668EA2C6ACC270068FB25 /* BackgroundView.swift */,
 				9CE668EE2C6AF1080068FB25 /* SettingsView.swift */,
+				9C65C9282C7C1A220059F526 /* TopCategoryCardView.swift */,
+				9C65C92C2C7C1A3F0059F526 /* CategoryExperienceCardView.swift */,
+				9C65C9302C7C1A630059F526 /* StreakCardView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -207,6 +222,9 @@
 				9C87183C2C616D30008C5AFA /* SignInViewModel.swift */,
 				9C87183E2C616D3B008C5AFA /* SignUpViewModel.swift */,
 				9CE668EC2C6AF0F10068FB25 /* SettingsViewModel.swift */,
+				9C65C9262C7C1A100059F526 /* TopCategoryCardViewModel.swift */,
+				9C65C92A2C7C1A300059F526 /* CategoryExperienceCardViewModel.swift */,
+				9C65C92E2C7C1A530059F526 /* StreakCardViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -466,15 +484,21 @@
 				9C8718342C6062D2008C5AFA /* AppDelegate.swift in Sources */,
 				9C87183F2C616D3B008C5AFA /* SignUpViewModel.swift in Sources */,
 				9C8718412C616D46008C5AFA /* SignUpView.swift in Sources */,
+				9C65C9272C7C1A100059F526 /* TopCategoryCardViewModel.swift in Sources */,
+				9C65C9312C7C1A630059F526 /* StreakCardView.swift in Sources */,
 				9CAC4E532C584D15005CCEF2 /* RewardInputViewModel.swift in Sources */,
 				9C05371A2C536B180062AEDE /* ProfileView.swift in Sources */,
 				9CEF0EE42C505CE4008E091B /* XPTask.swift in Sources */,
+				9C65C92F2C7C1A530059F526 /* StreakCardViewModel.swift in Sources */,
+				9C65C92B2C7C1A300059F526 /* CategoryExperienceCardViewModel.swift in Sources */,
 				9CAC4E572C584DC0005CCEF2 /* ProfileViewModel.swift in Sources */,
 				9CEF0EB12C50412B008E091B /* ContentView.swift in Sources */,
 				9C87183D2C616D30008C5AFA /* SignInViewModel.swift in Sources */,
 				9CEF0EB32C50412B008E091B /* Item.swift in Sources */,
 				9CE668EF2C6AF1080068FB25 /* SettingsView.swift in Sources */,
+				9C65C9292C7C1A220059F526 /* TopCategoryCardView.swift in Sources */,
 				9C05371C2C536DAA0062AEDE /* OptionSelectionView.swift in Sources */,
+				9C65C92D2C7C1A3F0059F526 /* CategoryExperienceCardView.swift in Sources */,
 				9C8718432C616D50008C5AFA /* SignInView.swift in Sources */,
 				9CEF0EAF2C50412B008E091B /* XPApp.swift in Sources */,
 				9CEF0EDC2C505BC0008E091B /* PersistenceManager.swift in Sources */,

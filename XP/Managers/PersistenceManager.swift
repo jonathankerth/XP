@@ -6,12 +6,14 @@ class PersistenceManager: ObservableObject {
     
     @Published var tasks: [XPTask] = []
     @Published var levelRewards: [String] = []
+    @Published var earnedXP: Int = 0 // New field to store earned XP
 
     private let defaults = UserDefaults.standard
 
     private init() {
         self.levelRewards = loadLevelRewards()
         self.tasks = loadTasks()
+        self.earnedXP = loadEarnedXP() // Load earned XP from defaults
     }
 
     func saveTasks(_ tasks: [XPTask]) {
@@ -36,6 +38,14 @@ class PersistenceManager: ObservableObject {
 
     func loadAccumulatedXP() -> Int {
         return defaults.integer(forKey: "accumulatedXP")
+    }
+
+    func saveEarnedXP(_ xp: Int) {
+        defaults.set(xp, forKey: "earnedXP")
+    }
+
+    func loadEarnedXP() -> Int {
+        return defaults.integer(forKey: "earnedXP")
     }
 
     func saveLevel(_ level: Int) {
@@ -80,23 +90,36 @@ class PersistenceManager: ObservableObject {
     func resetUserData() {
         saveLevel(1)
         saveAccumulatedXP(0)
+        saveEarnedXP(0)
     }
 
     func endOfDayReset(tasks: inout [XPTask]) {
         let now = Date().timeIntervalSince1970
-        var totalXP = loadAccumulatedXP()
+        let timeZone = TimeZone(identifier: "America/Los_Angeles")! // PST
+        let totalXP = loadAccumulatedXP()
+        var earnedXP = loadEarnedXP()
 
         tasks = tasks.map {
             var task = $0
             if task.completed && !task.xpAwarded {
-                totalXP += task.xp
+                earnedXP += task.xp
                 task.xpAwarded = true // Mark XP as awarded
             }
 
+            // Check if the current time has passed the next due date
             if let nextDueDate = task.nextDueDate?.timeIntervalSince1970, now >= nextDueDate {
                 task.completed = false
                 task.lastReset = Date()
-                task.nextDueDate = Calendar.current.date(byAdding: .day, value: task.resetFrequency, to: Date())
+
+                // Calculate the next due date for midnight in PST
+                let calendar = Calendar.current
+                if let newNextDueDate = calendar.date(byAdding: .day, value: task.resetFrequency, to: Date()) {
+                    var components = calendar.dateComponents(in: timeZone, from: newNextDueDate)
+                    components.hour = 0
+                    components.minute = 0
+                    components.second = 0
+                    task.nextDueDate = calendar.date(from: components)
+                }
                 task.xpAwarded = false // Reset xpAwarded for the next cycle
             }
 
@@ -104,6 +127,7 @@ class PersistenceManager: ObservableObject {
         }
 
         saveAccumulatedXP(totalXP)
+        saveEarnedXP(earnedXP)
         saveTasks(tasks)
     }
 
@@ -151,15 +175,32 @@ class PersistenceManager: ObservableObject {
                 print("Error fetching level rewards from Firebase: \(error)")
             }
         }
+
+        // Fetch earned XP
+        FirestoreManager.shared.fetchEarnedXP(userID: userID) { earnedXP, error in
+            if let earnedXP = earnedXP {
+                self.saveEarnedXP(earnedXP)
+            } else if let error = error {
+                print("Error fetching earned XP from Firebase: \(error)")
+            }
+        }
     }
 
     func saveUserDataToFirestore(userID: String) {
         let xp = loadAccumulatedXP()
         let level = loadLevel()
         let rewards = loadRewards()
+        let earnedXP = loadEarnedXP()
+
         FirestoreManager.shared.saveUserXPAndLevel(userID: userID, xp: xp, level: level, rewards: rewards) { error in
             if let error = error {
                 print("Error saving user XP and level to Firebase: \(error)")
+            }
+        }
+
+        FirestoreManager.shared.saveEarnedXP(userID: userID, earnedXP: earnedXP) { error in
+            if let error = error {
+                print("Error saving earned XP to Firebase: \(error)")
             }
         }
 

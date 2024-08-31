@@ -4,6 +4,7 @@ struct MainContentView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var tasks: [XPTask] = []
     @State private var accumulatedXP: Int = 0
+    @State private var earnedXP: Int = 0 // New state for earned XP
     @State private var level: Int = 1
     @State private var maxXP: Int = 100
     @State private var levelRewards: [String] = []
@@ -41,7 +42,7 @@ struct MainContentView: View {
                 .padding(.horizontal)
 
                 VStack(spacing: 0) {
-                    XPBar(totalXP: accumulatedXP, maxXP: maxXP, level: level, reward: currentReward)
+                    XPBar(accumulatedXP: accumulatedXP, earnedXP: earnedXP, maxXP: maxXP, level: level, reward: currentReward)
                         .padding(.top, 20)
 
                     TaskListView(tasks: $tasks, onTasksChange: saveTasks)
@@ -58,13 +59,13 @@ struct MainContentView: View {
                                 .font(.system(size: 40, weight: .bold))
                                 .foregroundColor(.white)
                         }
-                        .padding(.top, 10) // Reduced space above the "+"
-                        .padding(.bottom, showOptions ? 10 : 40) // Adjusted space below the button
+                        .padding(.top, 10)
+                        .padding(.bottom, showOptions ? 10 : 40)
                     }
 
                     if showOptions {
                         OptionSelectionView(isPresented: $showOptions, showAddTaskForm: $showAddTaskForm, showAddRewardForm: $showAddRewardForm)
-                            .padding(.bottom, 20) // Ensure there is space below the OptionSelectionView
+                            .padding(.bottom, 20)
                     }
 
                     if showAddTaskForm {
@@ -107,7 +108,7 @@ struct MainContentView: View {
                     fetchLevelRewards(userID: userID)
                 }
             }
-            startResetTimer() // Start the reset timer when the view appears
+            startResetTimer()
         }
         .onDisappear {
             if let userID = authViewModel.currentUser?.uid {
@@ -126,7 +127,6 @@ struct MainContentView: View {
         }
     }
 
-
     private func saveTasks() {
         if let userID = authViewModel.currentUser?.uid {
             persistenceManager.saveTasks(tasks)
@@ -137,17 +137,19 @@ struct MainContentView: View {
 
     private func calculateAccumulatedXP() {
         accumulatedXP = tasks.filter { $0.completed }.reduce(0) { $0 + Int($1.xp) }
+        earnedXP = persistenceManager.loadEarnedXP() // Load earned XP from the persistence manager
         persistenceManager.saveAccumulatedXP(accumulatedXP)
         checkLevelUp()
     }
 
     private func checkLevelUp() {
-        if accumulatedXP >= maxXP {
+        if accumulatedXP + earnedXP >= maxXP {
             level += 1
-            accumulatedXP -= maxXP
+            earnedXP -= (maxXP - accumulatedXP)
+            accumulatedXP = 0
             maxXP = calculateMaxXP(for: level)
             persistenceManager.saveLevel(level)
-            persistenceManager.saveAccumulatedXP(accumulatedXP)
+            persistenceManager.saveEarnedXP(earnedXP)
         }
         updateXPAndLevelInFirestore()
     }
@@ -174,11 +176,10 @@ struct MainContentView: View {
         }
     }
 
-    // Start a timer that checks every few minutes if tasks need to be reset
     private func startResetTimer() {
         Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { _ in
             self.persistenceManager.resetTasksIfNeeded()
-            self.calculateAccumulatedXP() // Recalculate XP after resetting tasks
+            self.calculateAccumulatedXP()
         }
     }
 }

@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct XPBar: View {
-    var totalXP: Int
+    var accumulatedXP: Int
+    var earnedXP: Int
     var maxXP: Int
     var level: Int
     var reward: String
@@ -10,17 +11,17 @@ struct XPBar: View {
         VStack {
             Text("Level \(level)")
                 .font(.title)
-                .foregroundColor(.white) // Change text color to white
-            Text("Total XP: \(totalXP)/\(maxXP)")
+                .foregroundColor(.white)
+            Text("Total XP: \(accumulatedXP + earnedXP)/\(maxXP)")
                 .font(.headline)
-                .foregroundColor(.white) // Change text color to white
-            ProgressView(value: Double(totalXP), total: Double(maxXP))
+                .foregroundColor(.white)
+            ProgressView(value: Double(accumulatedXP + earnedXP), total: Double(maxXP))
                 .progressViewStyle(LinearProgressViewStyle())
                 .padding([.leading, .trailing])
             if !reward.isEmpty {
                 Text("Reward: \(reward)")
                     .font(.subheadline)
-                    .foregroundColor(.white) // Change text color to white
+                    .foregroundColor(.white)
             }
         }
         .padding([.leading, .trailing])

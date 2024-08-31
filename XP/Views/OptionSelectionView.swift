@@ -42,7 +42,7 @@ struct OptionSelectionView: View {
                         .cornerRadius(20)
                         .overlay(
                             RoundedRectangle(cornerRadius: 20)
-                                .stroke(Color.green, lineWidth: 1)
+                                .stroke(Color.blue, lineWidth: 1)
                         )
                 }
             }

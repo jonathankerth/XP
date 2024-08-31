@@ -1,6 +1,7 @@
 import SwiftUI
 import FirebaseAuth
 
+
 struct ProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.presentationMode) var presentationMode
@@ -23,6 +24,14 @@ struct ProfileView: View {
                             .padding(.top, 100) // Increase the padding from the top
                             .padding(.horizontal)
                     }
+
+                    // Cards Section
+                    VStack(spacing: 20) {
+                        TopCategoryCardView(viewModel: TopCategoryCardViewModel(tasks: viewModel.tasks))
+                        CategoryExperienceCardView(viewModel: CategoryExperienceCardViewModel(tasks: viewModel.tasks))
+                        StreakCardView(viewModel: StreakCardViewModel(tasks: viewModel.tasks))
+                    }
+                    .padding(.horizontal)
 
                     List {
                         Section(header: Text("Level Rewards").foregroundColor(.white)) {

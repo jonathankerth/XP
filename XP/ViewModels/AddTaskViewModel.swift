@@ -48,12 +48,25 @@ class AddTaskViewModel: ObservableObject {
     }
 
 
+
     func cancel() {
         showAddTaskForm.wrappedValue = false
     }
 
     private func calculateNextDueDate(for frequency: TaskFrequency) -> Date? {
         let calendar = Calendar.current
-        return calendar.date(byAdding: .day, value: frequency.rawValue, to: Date())
+        let timeZone = TimeZone(identifier: "America/Los_Angeles")! // PST
+        
+        // Calculate the next reset date by adding the frequency (days) to the current date
+        let nextResetDate = calendar.date(byAdding: .day, value: frequency.rawValue, to: Date())
+        
+        // Set the components for midnight (12:00 AM) in PST
+        var components = calendar.dateComponents(in: timeZone, from: nextResetDate ?? Date())
+        components.hour = 0
+        components.minute = 0
+        components.second = 0
+
+        return calendar.date(from: components)
     }
+
 }

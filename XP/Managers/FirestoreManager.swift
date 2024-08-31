@@ -18,8 +18,6 @@ class FirestoreManager: ObservableObject {
         } catch let error {
             completion(error)
         }
-    
-
     }
 
     func fetchTasks(userID: String, completion: @escaping ([XPTask]?, Error?) -> Void) {
@@ -43,7 +41,6 @@ class FirestoreManager: ObservableObject {
             }
         }
     }
-
 
     func updateTask(userID: String, task: XPTask, completion: @escaping (Error?) -> Void) {
         do {
@@ -143,6 +140,27 @@ class FirestoreManager: ObservableObject {
             }
         }
     }
-   
-   
+
+
+
+    func saveEarnedXP(userID: String, earnedXP: Int, completion: @escaping (Error?) -> Void) {
+        let userData: [String: Any] = [
+            "earnedXP": earnedXP
+        ]
+        db.collection("users").document(userID).setData(userData, merge: true) { error in
+            completion(error)
+        }
+    }
+
+    func fetchEarnedXP(userID: String, completion: @escaping (Int?, Error?) -> Void) {
+        db.collection("users").document(userID).getDocument { document, error in
+            if let document = document, document.exists {
+                let data = document.data()
+                let earnedXP = data?["earnedXP"] as? Int ?? 0
+                completion(earnedXP, nil)
+            } else {
+                completion(nil, error)
+            }
+        }
+    }
 }
