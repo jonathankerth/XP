@@ -43,13 +43,9 @@ struct FirstNameLastNameView: View {
                             .foregroundColor(.white)
                             .cornerRadius(25)
                     }
-
-                    NavigationLink(
-                        destination: EmailPasswordView(firstName: firstName, lastName: lastName)
-                            .environmentObject(signUpViewModel),
-                        isActive: $navigateToNext
-                    ) {
-                        EmptyView()
+                    .navigationDestination(isPresented: $navigateToNext) {
+                        EmailPasswordView(firstName: firstName, lastName: lastName)
+                            .environmentObject(signUpViewModel)
                     }
                 }
                 .padding()
