@@ -3,60 +3,6 @@ import Firebase
 import GoogleSignIn
 import AuthenticationServices
 
-struct GoogleSignInButtonWrapper: UIViewRepresentable {
-    @EnvironmentObject var authViewModel: AuthViewModel
-
-    func makeUIView(context: Context) -> UIView {
-        let containerView = UIView()
-        
-        let button = GIDSignInButton()
-        button.style = .wide
-        button.translatesAutoresizingMaskIntoConstraints = false
-        
-        containerView.addSubview(button)
-        
-        NSLayoutConstraint.activate([
-            button.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            button.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            button.topAnchor.constraint(equalTo: containerView.topAnchor),
-            button.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-            containerView.heightAnchor.constraint(equalToConstant: 50),
-            containerView.widthAnchor.constraint(equalToConstant: 312)
-        ])
-        
-        button.addTarget(context.coordinator, action: #selector(Coordinator.signInTapped), for: .touchUpInside)
-        
-        return containerView
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {}
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-
-    class Coordinator: NSObject {
-        var parent: GoogleSignInButtonWrapper
-
-        init(_ parent: GoogleSignInButtonWrapper) {
-            self.parent = parent
-        }
-
-        @objc func signInTapped() {
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let rootViewController = windowScene.windows.first?.rootViewController {
-                parent.authViewModel.signInWithGoogle(presentingViewController: rootViewController) { success in
-                    if success {
-                        // Handle successful Google sign-in
-                    } else {
-                        // Handle Google sign-in failure
-                    }
-                }
-            }
-        }
-    }
-}
-
 struct SignInView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showSignUp = false
@@ -98,10 +44,9 @@ struct SignInView: View {
                 }
                 .padding()
 
-                GoogleSignInButtonWrapper()
-                    .frame(width: 312, height: 50)
-                    .cornerRadius(25)
-                
+                CustomGoogleSignInButton()
+                    .padding(.horizontal)
+
                 SignInWithAppleButton(
                     .signIn,
                     onRequest: { request in

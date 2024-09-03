@@ -21,7 +21,6 @@ class ProfileViewModel: ObservableObject {
                 if let rewards = rewards {
                     DispatchQueue.main.async {
                         self.levelRewards = rewards
-                        print("Fetched rewards: \(rewards)") // Debugging
                     }
                 } else if let error = error {
                     print("Error fetching level rewards from Firebase: \(error)")
@@ -61,5 +60,4 @@ class ProfileViewModel: ObservableObject {
         }
         persistenceManager.saveLevelRewards(levelRewards)
     }
-
 }

@@ -1,7 +1,6 @@
 import SwiftUI
 import FirebaseAuth
 
-
 struct ProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.presentationMode) var presentationMode
@@ -9,7 +8,8 @@ struct ProfileView: View {
     @Environment(\.dismiss) var dismiss
 
     @State private var showSettings = false
-    @State private var fullName: String?
+    @State private var firstName: String?
+    @State private var lastName: String?
 
     var body: some View {
         NavigationStack {
@@ -17,11 +17,17 @@ struct ProfileView: View {
                 BackgroundView() // Add the background view
 
                 VStack {
-                    if let user = Auth.auth().currentUser {
-                        Text("Hello, \(fullName ?? user.email ?? "User")")
+                    if let firstName = firstName, let lastName = lastName {
+                        Text("Hello, \(firstName) \(lastName)")
                             .font(.headline)
                             .foregroundColor(.white) // Make the text white for better contrast
                             .padding(.top, 100) // Increase the padding from the top
+                            .padding(.horizontal)
+                    } else {
+                        Text("Hello")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding(.top, 100)
                             .padding(.horizontal)
                     }
 
@@ -124,15 +130,17 @@ struct ProfileView: View {
         }
     }
 
-    // Function to load the user's full name from Firestore
+    // Function to load the user's first and last name from Firestore
     private func loadUserFullName() {
         if let userID = Auth.auth().currentUser?.uid {
             FirestoreManager.shared.fetchUserProfile(userID: userID) { firstName, lastName, error in
                 if let firstName = firstName, let lastName = lastName {
-                    self.fullName = "\(firstName) \(lastName)"
+                    self.firstName = firstName
+                    self.lastName = lastName
                 } else {
-                    // No full name, use email instead
-                    self.fullName = Auth.auth().currentUser?.email
+                    // No first and last name, use a generic greeting
+                    self.firstName = nil
+                    self.lastName = nil
                 }
             }
         }

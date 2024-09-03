@@ -90,7 +90,14 @@ struct MainContentView: View {
                                 persistenceManager: persistenceManager,
                                 authViewModel: authViewModel,
                                 onRewardSet: { newReward in
-                                    self.levelRewards[level - 1] = newReward
+                                    if level - 1 < levelRewards.count {
+                                        self.levelRewards[level - 1] = newReward
+                                    } else {
+                                        while self.levelRewards.count < level {
+                                            self.levelRewards.append("")
+                                        }
+                                        self.levelRewards[level - 1] = newReward
+                                    }
                                 }
                             ))
                         }
@@ -169,6 +176,9 @@ struct MainContentView: View {
             if let rewards = rewards {
                 DispatchQueue.main.async {
                     self.levelRewards = rewards
+                    while self.levelRewards.count < self.level {
+                        self.levelRewards.append("")
+                    }
                 }
             } else if let error = error {
                 print("Error fetching level rewards from Firebase: \(error)")

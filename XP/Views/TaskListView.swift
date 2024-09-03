@@ -36,9 +36,8 @@ struct TaskListView: View {
                             Image(systemName: tasks[index].completed ? "checkmark.square.fill" : "square")
                                 .foregroundColor(tasks[index].completed ? .green : .gray)
                         }
-
                     }
-                    
+
                     Text("Category: \(task.category.rawValue)")
                         .font(.subheadline)
                         .foregroundColor(.gray)
@@ -60,6 +59,7 @@ struct TaskListView: View {
                 .listRowBackground(Color.clear) // Set list row background to clear
             }
             .onMove(perform: moveTask)
+            .onDelete(perform: deleteTask) // Enable swipe-to-delete
         }
         .listStyle(PlainListStyle())
         .background(Color.clear) // Ensure the list background is clear
