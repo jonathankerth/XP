@@ -47,8 +47,6 @@ class AddTaskViewModel: ObservableObject {
         }
     }
 
-
-
     func cancel() {
         showAddTaskForm.wrappedValue = false
     }
@@ -57,16 +55,22 @@ class AddTaskViewModel: ObservableObject {
         let calendar = Calendar.current
         let timeZone = TimeZone(identifier: "America/Los_Angeles")! // PST
         
-        // Calculate the next reset date by adding the frequency (days) to the current date
-        let nextResetDate = calendar.date(byAdding: .day, value: frequency.rawValue, to: Date())
+        // Get the current date components in PST
+        let currentDate = Date()
+        var currentComponents = calendar.dateComponents(in: timeZone, from: currentDate)
         
-        // Set the components for midnight (12:00 AM) in PST
-        var components = calendar.dateComponents(in: timeZone, from: nextResetDate ?? Date())
-        components.hour = 0
-        components.minute = 0
-        components.second = 0
-
-        return calendar.date(from: components)
+        // If the task is completed today, we want to target the next midnight
+        // Increment the day by the frequency
+        currentComponents.day = (currentComponents.day ?? 0) + frequency.rawValue
+        
+        // Set the time to midnight
+        currentComponents.hour = 0
+        currentComponents.minute = 0
+        currentComponents.second = 0
+        
+        // Return the next reset date (midnight of the next day after frequency days)
+        return calendar.date(from: currentComponents)
     }
+
 
 }

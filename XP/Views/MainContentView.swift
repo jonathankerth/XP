@@ -189,7 +189,12 @@ struct MainContentView: View {
     private func startResetTimer() {
         Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { _ in
             self.persistenceManager.resetTasksIfNeeded()
-            self.calculateAccumulatedXP()
+            if let userID = authViewModel.currentUser?.uid {
+                persistenceManager.syncUserData(userID: userID) { tasks in
+                    self.tasks = tasks
+                    self.calculateAccumulatedXP()
+                }
+            }
         }
     }
 }

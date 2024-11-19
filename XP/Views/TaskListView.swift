@@ -22,7 +22,7 @@ struct TaskListView: View {
                             if !tasks[index].completed {
                                 tasks[index].completed = true
                                 tasks[index].lastCompleted = Date()
-                                tasks[index].xpAwarded = false // Reset xpAwarded when the task is unchecked
+                                tasks[index].xpAwarded = false // Reset xpAwarded
                             } else {
                                 tasks[index].completed = false
                                 tasks[index].lastCompleted = nil
@@ -63,9 +63,6 @@ struct TaskListView: View {
         }
         .listStyle(PlainListStyle())
         .background(Color.clear) // Ensure the list background is clear
-        .onAppear {
-            print("Task list is now visible with \(tasks.count) tasks.")
-        }
     }
 
     func deleteTask(at offsets: IndexSet) {
@@ -84,13 +81,28 @@ struct TaskListView: View {
     }
 
     func updateNextDueDate(for task: inout XPTask) {
+        let calendar = Calendar.current
+        let timeZone = TimeZone(identifier: "America/Los_Angeles")! // PST
+        
+        // Calculate next due date based on task frequency
         if let lastCompleted = task.lastCompleted {
-            task.nextDueDate = Calendar.current.date(byAdding: .day, value: task.frequency.rawValue, to: lastCompleted)
-            task.lastReset = Date()
-        } else {
-            task.nextDueDate = nil
+            var components = DateComponents()
+            components.day = task.resetFrequency
+            
+            // Calculate the new next due date by adding reset frequency to the last completed date
+            if let newDueDate = calendar.date(byAdding: components, to: lastCompleted) {
+                // Set time to midnight of the new due date
+                var nextDueDateComponents = calendar.dateComponents(in: timeZone, from: newDueDate)
+                nextDueDateComponents.hour = 0
+                nextDueDateComponents.minute = 0
+                nextDueDateComponents.second = 0
+                
+                task.nextDueDate = calendar.date(from: nextDueDateComponents)
+            }
         }
+        task.lastReset = Date()
     }
+
 
     func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()

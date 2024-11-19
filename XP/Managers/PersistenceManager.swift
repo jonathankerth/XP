@@ -94,26 +94,25 @@ class PersistenceManager: ObservableObject {
     }
 
     func endOfDayReset(tasks: inout [XPTask]) {
-        let now = Date().timeIntervalSince1970
+        let now = Date()
+        let calendar = Calendar.current
         let timeZone = TimeZone(identifier: "America/Los_Angeles")! // PST
-        let totalXP = loadAccumulatedXP()
         var earnedXP = loadEarnedXP()
 
-        tasks = tasks.map {
-            var task = $0
+        tasks = tasks.map { task in
+            var task = task
             if task.completed && !task.xpAwarded {
                 earnedXP += task.xp
                 task.xpAwarded = true // Mark XP as awarded
             }
 
             // Check if the current time has passed the next due date
-            if let nextDueDate = task.nextDueDate?.timeIntervalSince1970, now >= nextDueDate {
+            if let nextDueDate = task.nextDueDate, now >= nextDueDate {
                 task.completed = false
-                task.lastReset = Date()
+                task.lastReset = now
 
-                // Calculate the next due date for midnight in PST
-                let calendar = Calendar.current
-                if let newNextDueDate = calendar.date(byAdding: .day, value: task.resetFrequency, to: Date()) {
+                // Calculate the next due date by adding resetFrequency to the current next due date
+                if let newNextDueDate = calendar.date(byAdding: .day, value: task.resetFrequency, to: nextDueDate) {
                     var components = calendar.dateComponents(in: timeZone, from: newNextDueDate)
                     components.hour = 0
                     components.minute = 0
@@ -126,10 +125,11 @@ class PersistenceManager: ObservableObject {
             return task
         }
 
-        saveAccumulatedXP(totalXP)
         saveEarnedXP(earnedXP)
         saveTasks(tasks)
     }
+
+
 
     func getLastResetDate() -> Date? {
         return defaults.object(forKey: "lastResetDate") as? Date
