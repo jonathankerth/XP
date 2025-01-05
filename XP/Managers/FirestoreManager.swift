@@ -10,7 +10,7 @@ class FirestoreManager: ObservableObject {
         do {
             let data = try JSONEncoder().encode(task)
             var json = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
-            json["xpAwarded"] = task.xpAwarded // Add xpAwarded to the stored data
+            json["xpAwarded"] = task.xpAwarded
 
             db.collection("users").document(userID).collection("tasks").document(task.id).setData(json) { error in
                 completion(error)
@@ -88,7 +88,6 @@ class FirestoreManager: ObservableObject {
     func fetchLevelRewards(userID: String, completion: @escaping ([String]?, Error?) -> Void) {
         db.collection("users").document(userID).collection("rewards").getDocuments { snapshot, error in
             if let error = error {
-                print("Error fetching level rewards from Firebase: \(error)")
                 completion(nil, error)
             } else {
                 var rewards: [String] = []
@@ -97,7 +96,6 @@ class FirestoreManager: ObservableObject {
                         rewards.append(reward)
                     }
                 }
-                print("Fetched rewards from Firebase: \(rewards)")
                 completion(rewards, nil)
             }
         }
@@ -109,11 +107,6 @@ class FirestoreManager: ObservableObject {
             "reward": reward
         ]
         db.collection("users").document(userID).collection("rewards").document("\(level)").setData(rewardData) { error in
-            if let error = error {
-                print("Error saving level reward to Firebase: \(error)")
-            } else {
-                print("Successfully saved reward \(reward) for level \(level) to Firebase")
-            }
             completion(error)
         }
     }
@@ -140,8 +133,6 @@ class FirestoreManager: ObservableObject {
             }
         }
     }
-
-
 
     func saveEarnedXP(userID: String, earnedXP: Int, completion: @escaping (Error?) -> Void) {
         let userData: [String: Any] = [

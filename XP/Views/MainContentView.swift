@@ -4,7 +4,7 @@ struct MainContentView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var tasks: [XPTask] = []
     @State private var accumulatedXP: Int = 0
-    @State private var earnedXP: Int = 0 // New state for earned XP
+    @State private var earnedXP: Int = 0
     @State private var level: Int = 1
     @State private var maxXP: Int = 100
     @State private var levelRewards: [String] = []
@@ -16,7 +16,7 @@ struct MainContentView: View {
 
     var body: some View {
         ZStack {
-            BackgroundView() // Background view behind everything
+            BackgroundView()
             
             VStack(spacing: 0) {
                 HStack {
@@ -46,7 +46,7 @@ struct MainContentView: View {
                         .padding(.top, 20)
 
                     TaskListView(tasks: $tasks, onTasksChange: saveTasks)
-                        .padding(.top, 0) // Reduced space between TaskListView and XPBar
+                        .padding(.top, 0)
                         .environmentObject(authViewModel)
 
                     Spacer()
@@ -103,7 +103,6 @@ struct MainContentView: View {
                         }
                         .padding()
                     }
-
                 }
             }
         }
@@ -115,7 +114,6 @@ struct MainContentView: View {
                     fetchLevelRewards(userID: userID)
                 }
             }
-            startResetTimer()
         }
         .onDisappear {
             if let userID = authViewModel.currentUser?.uid {
@@ -144,7 +142,7 @@ struct MainContentView: View {
 
     private func calculateAccumulatedXP() {
         accumulatedXP = tasks.filter { $0.completed }.reduce(0) { $0 + Int($1.xp) }
-        earnedXP = persistenceManager.loadEarnedXP() // Load earned XP from the persistence manager
+        earnedXP = persistenceManager.loadEarnedXP()
         persistenceManager.saveAccumulatedXP(accumulatedXP)
         checkLevelUp()
     }
@@ -179,20 +177,6 @@ struct MainContentView: View {
                     while self.levelRewards.count < self.level {
                         self.levelRewards.append("")
                     }
-                }
-            } else if let error = error {
-                print("Error fetching level rewards from Firebase: \(error)")
-            }
-        }
-    }
-
-    private func startResetTimer() {
-        Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { _ in
-            self.persistenceManager.resetTasksIfNeeded()
-            if let userID = authViewModel.currentUser?.uid {
-                persistenceManager.syncUserData(userID: userID) { tasks in
-                    self.tasks = tasks
-                    self.calculateAccumulatedXP()
                 }
             }
         }

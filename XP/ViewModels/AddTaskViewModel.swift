@@ -30,7 +30,7 @@ class AddTaskViewModel: ObservableObject {
                 nextDueDate: nextDueDate,
                 frequency: taskFrequency,
                 category: taskCategory,
-                lastReset: Date(), // Set current date as the last reset time
+                lastReset: Date(),
                 resetFrequency: taskFrequency.rawValue,
                 xpAwarded: false
             )
@@ -41,7 +41,7 @@ class AddTaskViewModel: ObservableObject {
             taskName = ""
             taskXP = 1
             taskFrequency = .oneDay
-            taskCategory = .hobbies  // Reset category
+            taskCategory = .hobbies
             onTasksChange()
             showAddTaskForm.wrappedValue = false
         }
@@ -53,24 +53,15 @@ class AddTaskViewModel: ObservableObject {
 
     private func calculateNextDueDate(for frequency: TaskFrequency) -> Date? {
         let calendar = Calendar.current
-        let timeZone = TimeZone(identifier: "America/Los_Angeles")! // PST
+        let timeZone = TimeZone(identifier: "America/Los_Angeles")!
         
-        // Get the current date components in PST
         let currentDate = Date()
         var currentComponents = calendar.dateComponents(in: timeZone, from: currentDate)
-        
-        // If the task is completed today, we want to target the next midnight
-        // Increment the day by the frequency
         currentComponents.day = (currentComponents.day ?? 0) + frequency.rawValue
-        
-        // Set the time to midnight
         currentComponents.hour = 0
         currentComponents.minute = 0
         currentComponents.second = 0
         
-        // Return the next reset date (midnight of the next day after frequency days)
         return calendar.date(from: currentComponents)
     }
-
-
 }

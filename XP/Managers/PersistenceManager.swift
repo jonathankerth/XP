@@ -6,30 +6,35 @@ class PersistenceManager: ObservableObject {
     
     @Published var tasks: [XPTask] = []
     @Published var levelRewards: [String] = []
-    @Published var earnedXP: Int = 0 // New field to store earned XP
-
+    @Published var earnedXP: Int = 0
+    @Published var syncInProgress: Bool = false
+    @Published var lastSyncDate: Date?
+    
     private let defaults = UserDefaults.standard
+    private let encoder = JSONEncoder()
+    private let decoder = JSONDecoder()
 
     private init() {
         self.levelRewards = loadLevelRewards()
         self.tasks = loadTasks()
-        self.earnedXP = loadEarnedXP() // Load earned XP from defaults
+        self.earnedXP = loadEarnedXP()
+        self.lastSyncDate = defaults.object(forKey: "lastSyncDate") as? Date
     }
 
-    func saveTasks(_ tasks: [XPTask]) {
-        if let encoded = try? JSONEncoder().encode(tasks) {
-            defaults.set(encoded, forKey: "tasks")
-        }
+    // MARK: - Local Storage Operations
+    
+    func saveTasks(_ tasks: [XPTask]) throws {
+        let encoded = try encoder.encode(tasks)
+        defaults.set(encoded, forKey: "tasks")
         self.tasks = tasks
     }
 
     func loadTasks() -> [XPTask] {
-        if let savedTasks = defaults.data(forKey: "tasks") {
-            if let decodedTasks = try? JSONDecoder().decode([XPTask].self, from: savedTasks) {
-                return decodedTasks
-            }
+        guard let savedTasks = defaults.data(forKey: "tasks"),
+              let decodedTasks = try? decoder.decode([XPTask].self, from: savedTasks) else {
+            return []
         }
-        return []
+        return decodedTasks
     }
 
     func saveAccumulatedXP(_ xp: Int) {
@@ -42,6 +47,7 @@ class PersistenceManager: ObservableObject {
 
     func saveEarnedXP(_ xp: Int) {
         defaults.set(xp, forKey: "earnedXP")
+        self.earnedXP = xp
     }
 
     func loadEarnedXP() -> Int {
@@ -56,200 +62,237 @@ class PersistenceManager: ObservableObject {
         return defaults.integer(forKey: "level")
     }
 
-    func saveRewards(_ rewards: [String]) {
-        if let encoded = try? JSONEncoder().encode(rewards) {
-            defaults.set(encoded, forKey: "rewards")
-        }
+    func saveRewards(_ rewards: [String]) throws {
+        let encoded = try encoder.encode(rewards)
+        defaults.set(encoded, forKey: "rewards")
     }
 
     func loadRewards() -> [String] {
-        if let savedRewards = defaults.data(forKey: "rewards") {
-            if let decodedRewards = try? JSONDecoder().decode([String].self, from: savedRewards) {
-                return decodedRewards
-            }
+        guard let savedRewards = defaults.data(forKey: "rewards"),
+              let decodedRewards = try? decoder.decode([String].self, from: savedRewards) else {
+            return []
         }
-        return []
+        return decodedRewards
     }
 
-    func saveLevelRewards(_ rewards: [String]) {
-        if let encoded = try? JSONEncoder().encode(rewards) {
-            defaults.set(encoded, forKey: "levelRewards")
-        }
+    func saveLevelRewards(_ rewards: [String]) throws {
+        let encoded = try encoder.encode(rewards)
+        defaults.set(encoded, forKey: "levelRewards")
         self.levelRewards = rewards
     }
 
     func loadLevelRewards() -> [String] {
-        if let savedRewards = defaults.data(forKey: "levelRewards") {
-            if let decodedRewards = try? JSONDecoder().decode([String].self, from: savedRewards) {
-                return decodedRewards
-            }
+        guard let savedRewards = defaults.data(forKey: "levelRewards"),
+              let decodedRewards = try? decoder.decode([String].self, from: savedRewards) else {
+            return []
         }
-        return []
+        return decodedRewards
     }
 
+    // MARK: - User Data Management
+    
     func resetUserData() {
         saveLevel(1)
         saveAccumulatedXP(0)
         saveEarnedXP(0)
+        tasks = []
+        levelRewards = []
+        try? saveTasks([])
+        try? saveLevelRewards([])
+        defaults.removeObject(forKey: "lastSyncDate")
     }
 
-    func endOfDayReset(tasks: inout [XPTask]) {
-        let now = Date()
-        let calendar = Calendar.current
-        let timeZone = TimeZone(identifier: "America/Los_Angeles")! // PST
-        var earnedXP = loadEarnedXP()
-
-        tasks = tasks.map { task in
-            var task = task
-            if task.completed && !task.xpAwarded {
-                earnedXP += task.xp
-                task.xpAwarded = true // Mark XP as awarded
-            }
-
-            // Check if the current time has passed the next due date
-            if let nextDueDate = task.nextDueDate, now >= nextDueDate {
-                task.completed = false
-                task.lastReset = now
-
-                // Calculate the next due date by adding resetFrequency to the current next due date
-                if let newNextDueDate = calendar.date(byAdding: .day, value: task.resetFrequency, to: nextDueDate) {
-                    var components = calendar.dateComponents(in: timeZone, from: newNextDueDate)
-                    components.hour = 0
-                    components.minute = 0
-                    components.second = 0
-                    task.nextDueDate = calendar.date(from: components)
-                }
-                task.xpAwarded = false // Reset xpAwarded for the next cycle
-            }
-
-            return task
+    // MARK: - Sync Operations
+    
+    func syncUserData(userID: String, completion: @escaping (Result<[XPTask], Error>) -> Void) {
+        guard !syncInProgress else {
+            completion(.failure(PersistenceError.syncInProgress))
+            return
         }
-
-        saveEarnedXP(earnedXP)
-        saveTasks(tasks)
-    }
-
-
-
-    func getLastResetDate() -> Date? {
-        return defaults.object(forKey: "lastResetDate") as? Date
-    }
-
-    func setLastResetDate(_ date: Date) {
-        defaults.set(date, forKey: "lastResetDate")
-    }
-
-    // Reset tasks if needed
-    func resetTasksIfNeeded() {
-        var tasks = self.tasks
-        endOfDayReset(tasks: &tasks)
-        self.tasks = tasks
-    }
-
-    // Firestore sync functions
-    func syncUserData(userID: String, completion: @escaping ([XPTask]) -> Void) {
-        FirestoreManager.shared.fetchUserXPAndLevel(userID: userID) { xp, level, rewards, error in
+        
+        syncInProgress = true
+        
+        let group = DispatchGroup()
+        var syncError: Error?
+        
+        // Sync XP and Level
+        group.enter()
+        FirestoreManager.shared.fetchUserXPAndLevel(userID: userID) { [weak self] xp, level, rewards, error in
+            defer { group.leave() }
+            if let error = error {
+                syncError = error
+                return
+            }
+            
             if let xp = xp, let level = level, let rewards = rewards {
-                self.saveAccumulatedXP(xp)
-                self.saveLevel(level)
-                self.saveRewards(rewards)
-            } else if let error = error {
-                print("Error fetching user XP and level from Firebase: \(error)")
+                self?.saveAccumulatedXP(xp)
+                self?.saveLevel(level)
+                try? self?.saveRewards(rewards)
             }
         }
 
-        FirestoreManager.shared.fetchTasks(userID: userID) { tasks, error in
+        // Sync Tasks
+        group.enter()
+        FirestoreManager.shared.fetchTasks(userID: userID) { [weak self] tasks, error in
+            defer { group.leave() }
+            if let error = error {
+                syncError = error
+                return
+            }
+            
             if let tasks = tasks {
-                self.saveTasks(tasks)
-                completion(tasks)
-            } else if let error = error {
-                print("Error fetching tasks from Firebase: \(error)")
-                completion([])
+                try? self?.saveTasks(tasks)
             }
         }
 
-        FirestoreManager.shared.fetchLevelRewards(userID: userID) { rewards, error in
+        // Sync Level Rewards
+        group.enter()
+        FirestoreManager.shared.fetchLevelRewards(userID: userID) { [weak self] rewards, error in
+            defer { group.leave() }
+            if let error = error {
+                syncError = error
+                return
+            }
+            
             if let rewards = rewards {
-                self.saveLevelRewards(rewards)
-            } else if let error = error {
-                print("Error fetching level rewards from Firebase: \(error)")
+                try? self?.saveLevelRewards(rewards)
             }
         }
 
-        // Fetch earned XP
-        FirestoreManager.shared.fetchEarnedXP(userID: userID) { earnedXP, error in
+        // Sync Earned XP
+        group.enter()
+        FirestoreManager.shared.fetchEarnedXP(userID: userID) { [weak self] earnedXP, error in
+            defer { group.leave() }
+            if let error = error {
+                syncError = error
+                return
+            }
+            
             if let earnedXP = earnedXP {
-                self.saveEarnedXP(earnedXP)
-            } else if let error = error {
-                print("Error fetching earned XP from Firebase: \(error)")
+                self?.saveEarnedXP(earnedXP)
+            }
+        }
+
+        group.notify(queue: .main) { [weak self] in
+            self?.syncInProgress = false
+            self?.lastSyncDate = Date()
+            self?.defaults.set(self?.lastSyncDate, forKey: "lastSyncDate")
+            
+            if let error = syncError {
+                completion(.failure(error))
+            } else {
+                completion(.success(self?.tasks ?? []))
             }
         }
     }
 
-    func saveUserDataToFirestore(userID: String) {
-        let xp = loadAccumulatedXP()
-        let level = loadLevel()
-        let rewards = loadRewards()
-        let earnedXP = loadEarnedXP()
-
-        FirestoreManager.shared.saveUserXPAndLevel(userID: userID, xp: xp, level: level, rewards: rewards) { error in
+    func saveUserDataToFirestore(userID: String, completion: @escaping (Error?) -> Void) {
+        let group = DispatchGroup()
+        var saveError: Error?
+        
+        // Save XP and Level
+        group.enter()
+        FirestoreManager.shared.saveUserXPAndLevel(
+            userID: userID,
+            xp: loadAccumulatedXP(),
+            level: loadLevel(),
+            rewards: loadRewards()
+        ) { error in
+            defer { group.leave() }
             if let error = error {
-                print("Error saving user XP and level to Firebase: \(error)")
+                saveError = error
             }
         }
 
-        FirestoreManager.shared.saveEarnedXP(userID: userID, earnedXP: earnedXP) { error in
+        // Save Earned XP
+        group.enter()
+        FirestoreManager.shared.saveEarnedXP(
+            userID: userID,
+            earnedXP: loadEarnedXP()
+        ) { error in
+            defer { group.leave() }
             if let error = error {
-                print("Error saving earned XP to Firebase: \(error)")
+                saveError = error
             }
         }
 
-        tasks.forEach { task in
+        // Save Tasks
+        let tasks = self.tasks
+        for task in tasks {
+            group.enter()
             FirestoreManager.shared.saveTask(userID: userID, task: task) { error in
+                defer { group.leave() }
                 if let error = error {
-                    print("Error saving task to Firebase: \(error)")
+                    saveError = error
                 }
             }
         }
+
+        group.notify(queue: .main) {
+            completion(saveError)
+        }
     }
 
-    func addTask(userID: String, task: XPTask) {
+    // MARK: - Task Operations
+    
+    func addTask(userID: String, task: XPTask, completion: @escaping (Error?) -> Void) {
         tasks.append(task)
-        saveTasks(tasks)
-        FirestoreManager.shared.saveTask(userID: userID, task: task) { error in
-            if let error = error {
-                print("Error adding task to Firebase: \(error)")
-            }
+        do {
+            try saveTasks(tasks)
+            FirestoreManager.shared.saveTask(userID: userID, task: task, completion: completion)
+        } catch {
+            completion(error)
         }
     }
 
-    func updateTask(userID: String, task: XPTask) {
-        if let index = tasks.firstIndex(where: { $0.id == task.id }) {
-            tasks[index] = task
-            saveTasks(tasks)
-            FirestoreManager.shared.updateTask(userID: userID, task: task) { error in
-                if let error = error {
-                    print("Error updating task in Firebase: \(error)")
-                }
-            }
+    func updateTask(userID: String, task: XPTask, completion: @escaping (Error?) -> Void) {
+        guard let index = tasks.firstIndex(where: { $0.id == task.id }) else {
+            completion(PersistenceError.taskNotFound)
+            return
+        }
+        
+        tasks[index] = task
+        do {
+            try saveTasks(tasks)
+            FirestoreManager.shared.updateTask(userID: userID, task: task, completion: completion)
+        } catch {
+            completion(error)
         }
     }
 
-    func deleteTask(userID: String, taskID: String) {
+    func deleteTask(userID: String, taskID: String, completion: @escaping (Error?) -> Void) {
         tasks.removeAll { $0.id == taskID }
-        saveTasks(tasks)
-        FirestoreManager.shared.deleteTask(userID: userID, taskId: taskID) { error in
-            if let error = error {
-                print("Error deleting task from Firebase: \(error)")
-            }
+        do {
+            try saveTasks(tasks)
+            FirestoreManager.shared.deleteTask(userID: userID, taskId: taskID, completion: completion)
+        } catch {
+            completion(error)
         }
     }
 
-    func saveLevelReward(userID: String, level: Int, reward: String) {
-        FirestoreManager.shared.saveLevelReward(userID: userID, level: level, reward: reward) { error in
-            if let error = error {
-                print("Error saving level reward to Firebase: \(error)")
-            }
+    func saveLevelReward(userID: String, level: Int, reward: String, completion: @escaping (Error?) -> Void) {
+        FirestoreManager.shared.saveLevelReward(userID: userID, level: level, reward: reward, completion: completion)
+    }
+}
+
+// MARK: - Error Types
+
+enum PersistenceError: LocalizedError {
+    case syncInProgress
+    case taskNotFound
+    case encodingError
+    case decodingError
+    
+    var errorDescription: String? {
+        switch self {
+        case .syncInProgress:
+            return "A sync operation is already in progress"
+        case .taskNotFound:
+            return "The specified task was not found"
+        case .encodingError:
+            return "Failed to encode data"
+        case .decodingError:
+            return "Failed to decode data"
         }
     }
 }
