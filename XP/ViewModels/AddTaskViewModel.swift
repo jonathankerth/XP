@@ -6,6 +6,8 @@ class AddTaskViewModel: ObservableObject {
     @Published var taskXP: Int = 1
     @Published var taskFrequency: TaskFrequency = .oneDay
     @Published var taskCategory: TaskCategory = .hobbies
+    @Published var errorMessage: String?
+    
     var tasks: Binding<[XPTask]>
     var showAddTaskForm: Binding<Bool>
     var onTasksChange: () -> Void
@@ -19,32 +21,49 @@ class AddTaskViewModel: ObservableObject {
     }
 
     func addTask() {
-        if !taskName.isEmpty {
-            let nextDueDate = calculateNextDueDate(for: taskFrequency)
-            let newTask = XPTask(
-                id: UUID().uuidString,
-                name: taskName,
-                xp: taskXP,
-                completed: false,
-                lastCompleted: nil,
-                nextDueDate: nextDueDate,
-                frequency: taskFrequency,
-                category: taskCategory,
-                lastReset: Date(),
-                resetFrequency: taskFrequency.rawValue,
-                xpAwarded: false
-            )
-            tasks.wrappedValue.append(newTask)
-            if let userID = authViewModel.currentUser?.uid {
-                PersistenceManager.shared.addTask(userID: userID, task: newTask)
-            }
-            taskName = ""
-            taskXP = 1
-            taskFrequency = .oneDay
-            taskCategory = .hobbies
-            onTasksChange()
-            showAddTaskForm.wrappedValue = false
+        guard !taskName.isEmpty else {
+            errorMessage = "Task name cannot be empty"
+            return
         }
+
+        let nextDueDate = calculateNextDueDate(for: taskFrequency)
+        let newTask = XPTask(
+            id: UUID().uuidString,
+            name: taskName,
+            xp: taskXP,
+            completed: false,
+            lastCompleted: nil,
+            nextDueDate: nextDueDate,
+            frequency: taskFrequency,
+            category: taskCategory,
+            lastReset: Date(),
+            resetFrequency: taskFrequency.rawValue,
+            xpAwarded: false
+        )
+
+        if let userID = authViewModel.currentUser?.uid {
+            PersistenceManager.shared.addTask(userID: userID, task: newTask) { [weak self] error in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        self?.errorMessage = "Failed to save task: \(error.localizedDescription)"
+                    } else {
+                        self?.tasks.wrappedValue.append(newTask)
+                        self?.resetForm()
+                    }
+                }
+            }
+        } else {
+            errorMessage = "User not authenticated"
+        }
+    }
+
+    private func resetForm() {
+        taskName = ""
+        taskXP = 1
+        taskFrequency = .oneDay
+        taskCategory = .hobbies
+        onTasksChange()
+        showAddTaskForm.wrappedValue = false
     }
 
     func cancel() {

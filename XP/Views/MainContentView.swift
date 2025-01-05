@@ -8,6 +8,8 @@ struct MainContentView: View {
     @State private var level: Int = 1
     @State private var maxXP: Int = 100
     @State private var levelRewards: [String] = []
+    @State private var errorMessage: String?
+    @State private var showError = false
     @StateObject private var persistenceManager = PersistenceManager.shared
 
     @State private var showAddTaskForm = false
@@ -108,17 +110,33 @@ struct MainContentView: View {
         }
         .onAppear {
             if let userID = authViewModel.currentUser?.uid {
-                persistenceManager.syncUserData(userID: userID) { tasks in
-                    self.tasks = tasks
-                    calculateAccumulatedXP()
-                    fetchLevelRewards(userID: userID)
+                persistenceManager.syncUserData(userID: userID) { result in
+                    switch result {
+                    case .success(let fetchedTasks):
+                        self.tasks = fetchedTasks
+                        calculateAccumulatedXP()
+                        fetchLevelRewards(userID: userID)
+                    case .failure(let error):
+                        self.errorMessage = "Failed to sync data: \(error.localizedDescription)"
+                        self.showError = true
+                    }
                 }
             }
         }
         .onDisappear {
             if let userID = authViewModel.currentUser?.uid {
-                persistenceManager.saveUserDataToFirestore(userID: userID)
+                persistenceManager.saveUserDataToFirestore(userID: userID) { error in
+                    if let error = error {
+                        self.errorMessage = "Failed to save data: \(error.localizedDescription)"
+                        self.showError = true
+                    }
+                }
             }
+        }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage ?? "An unknown error occurred")
         }
         .navigationTitle("")
         .navigationBarHidden(true)
@@ -134,9 +152,19 @@ struct MainContentView: View {
 
     private func saveTasks() {
         if let userID = authViewModel.currentUser?.uid {
-            persistenceManager.saveTasks(tasks)
-            calculateAccumulatedXP()
-            persistenceManager.saveUserDataToFirestore(userID: userID)
+            do {
+                try persistenceManager.saveTasks(tasks)
+                calculateAccumulatedXP()
+                persistenceManager.saveUserDataToFirestore(userID: userID) { error in
+                    if let error = error {
+                        self.errorMessage = "Failed to save tasks: \(error.localizedDescription)"
+                        self.showError = true
+                    }
+                }
+            } catch {
+                self.errorMessage = "Failed to save tasks locally: \(error.localizedDescription)"
+                self.showError = true
+            }
         }
     }
 
@@ -165,12 +193,23 @@ struct MainContentView: View {
 
     private func updateXPAndLevelInFirestore() {
         if let userID = authViewModel.currentUser?.uid {
-            persistenceManager.saveUserDataToFirestore(userID: userID)
+            persistenceManager.saveUserDataToFirestore(userID: userID) { error in
+                if let error = error {
+                    self.errorMessage = "Failed to update XP and level: \(error.localizedDescription)"
+                    self.showError = true
+                }
+            }
         }
     }
 
     private func fetchLevelRewards(userID: String) {
         FirestoreManager.shared.fetchLevelRewards(userID: userID) { rewards, error in
+            if let error = error {
+                self.errorMessage = "Failed to fetch rewards: \(error.localizedDescription)"
+                self.showError = true
+                return
+            }
+            
             if let rewards = rewards {
                 DispatchQueue.main.async {
                     self.levelRewards = rewards
